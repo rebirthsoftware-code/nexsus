@@ -1,85 +1,94 @@
 import Link from "next/link";
-import { Mail, MapPin, MessageCircle } from "lucide-react";
-import { InstagramIcon, LinkedinIcon, YoutubeIcon } from "./icons";
+import { ArrowUpRight, Mail, MapPin } from "lucide-react";
 import { site, navLinks } from "@/content/site";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 import { Year } from "./Year";
+import { InstagramIcon, LinkedinIcon, YoutubeIcon } from "./icons";
 
 export function Footer() {
   const socials = [
     { href: site.socials.instagram, label: "Instagram", Icon: InstagramIcon },
     { href: site.socials.linkedin, label: "LinkedIn", Icon: LinkedinIcon },
     { href: site.socials.youtube, label: "YouTube", Icon: YoutubeIcon },
-    { href: site.socials.whatsapp, label: "WhatsApp", Icon: MessageCircle },
   ].filter((s) => s.href);
 
   return (
-    <footer className="relative mt-24 border-t border-white/5">
-      <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-brand-400/60 to-transparent" />
-      <Container className="py-14">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+    <footer className="relative mt-28 overflow-hidden rounded-t-[2rem] bg-ink text-paper sm:rounded-t-[3rem]">
+      <Container className="pb-8 pt-16 sm:pt-20">
+        <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
           <div>
-            <Logo />
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">{site.description}</p>
-            <div className="mt-5 flex gap-2">
+            <Logo invert />
+            <p className="display-tight mt-8 max-w-xl text-4xl sm:text-5xl">
+              Bir sonraki etkinlikte <span className="font-serif font-normal italic tracking-[-0.02em] text-lime">görüşelim.</span>
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
               {socials.map(({ href, label, Icon }) => (
                 <a
                   key={label}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={label}
-                  className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-slate-300 transition-all hover:border-brand-400/60 hover:text-white hover:shadow-[0_0_24px_-6px_rgba(167,139,250,0.8)]"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-paper px-4 py-2 text-sm font-semibold transition-colors hover:bg-paper hover:text-ink"
                 >
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  <ArrowUpRight className="h-4 w-4" />
                 </a>
               ))}
             </div>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">Sayfalar</h3>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              {navLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-slate-400 transition-colors hover:text-white">
-                    {l.label}
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <h3 className="label-mono text-paper/60">Sayfalar</h3>
+              <ul className="mt-4 space-y-2.5 font-display text-lg font-bold tracking-tight">
+                {navLinks.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="transition-colors hover:text-lime">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link href="/basvuru" className="text-lime underline decoration-2 underline-offset-4">
+                    Üyelik başvurusu
                   </Link>
                 </li>
-              ))}
-              <li>
-                <Link href="/basvuru" className="text-brand-300 transition-colors hover:text-white">
-                  Üyelik Başvurusu
-                </Link>
-              </li>
-            </ul>
+              </ul>
+            </div>
+            <div>
+              <h3 className="label-mono text-paper/60">İletişim</h3>
+              <ul className="mt-4 space-y-3 text-sm text-paper/80">
+                <li className="flex items-start gap-2.5">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
+                  <a href={`mailto:${site.email}`} className="break-all hover:text-paper">
+                    {site.email}
+                  </a>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
+                  <span>{site.location}</span>
+                </li>
+              </ul>
+            </div>
           </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">İletişim</h3>
-            <ul className="mt-4 space-y-3 text-sm text-slate-400">
-              <li className="flex items-start gap-2.5">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" />
-                <a href={`mailto:${site.email}`} className="hover:text-white">
-                  {site.email}
-                </a>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" />
-                <span>{site.location}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/5 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center">
-          <p>
-            © {site.foundedYear}–<Year fallback={site.foundedYear + 1} /> {site.fullName}. {site.university} öğrenci kulübüdür.
-          </p>
-          <p>Öğrenciler tarafından, öğrenciler için tasarlandı.</p>
         </div>
       </Container>
+
+      {/* Dev kelime işareti */}
+      <p className="display-tight pointer-events-none -mb-[0.16em] select-none text-center text-[25.5vw] leading-none text-[#2b2622]" aria-hidden="true">
+        NEXUS
+      </p>
+
+      <div className="relative border-t-2 border-paper/15 bg-ink">
+        <Container className="flex flex-col items-start justify-between gap-2 py-5 text-xs text-paper/60 sm:flex-row sm:items-center">
+          <p>
+            © {site.foundedYear}–<Year fallback={site.foundedYear + 2} /> {site.fullName} · {site.university}
+          </p>
+          <p className="label-mono">Öğrenciler tarafından, öğrenciler için</p>
+        </Container>
+      </div>
     </footer>
   );
 }

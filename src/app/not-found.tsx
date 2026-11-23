@@ -1,13 +1,18 @@
 import { Container } from "@/components/Container";
 import { Button } from "@/components/Button";
+import { Mark } from "@/components/Shapes";
 
 export default function NotFound() {
   return (
-    <Container className="flex min-h-[70vh] flex-col items-center justify-center pt-28 text-center">
-      <p className="font-display text-7xl font-bold text-gradient">404</p>
-      <h1 className="mt-4 font-display text-2xl font-semibold text-white">Bu bağlantı kopmuş.</h1>
-      <p className="mt-2 text-slate-400">Aradığın sayfa taşınmış ya da hiç var olmamış olabilir.</p>
-      <Button href="/" className="mt-8">Ana sayfaya dön</Button>
+    <Container className="flex min-h-[80vh] flex-col items-start justify-center pt-28">
+      <p className="label-mono rounded-full border-2 border-ink bg-coral px-3 py-1.5">Hata 404</p>
+      <h1 className="display-tight mt-6 text-[clamp(3.5rem,12vw,8rem)]">
+        Bu bağlantı <Mark>kopmuş.</Mark>
+      </h1>
+      <p className="mt-6 max-w-md text-lg text-ink-soft">Aradığın sayfa taşınmış ya da hiç var olmamış olabilir. Seni yeniden ağa bağlayalım.</p>
+      <Button href="/" className="mt-8">
+        Ana sayfaya dön
+      </Button>
     </Container>
   );
 }

@@ -2,15 +2,29 @@ export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function formatDate(iso: string) {
-  return new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(
-    new Date(`${iso}T00:00:00`)
-  );
+const MONTHS_SHORT = ["OCA", "ŞUB", "MAR", "NİS", "MAY", "HAZ", "TEM", "AĞU", "EYL", "EKİ", "KAS", "ARA"];
+const WEEKDAYS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+
+/** "2026-12-09" → { day: "09", month: "ARA", year: "2026", weekday: "Çarşamba" } (saat dilimi etkisi olmadan) */
+export function dateParts(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return { day: String(d).padStart(2, "0"), month: MONTHS_SHORT[m - 1], year: String(y), weekday };
+}
+
+/** İki ISO tarih arasındaki gün farkı (b - a) */
+export function daysBetween(a: string, b: string) {
+  const toUtc = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((toUtc(b) - toUtc(a)) / 86_400_000);
 }
 
 export function initials(name: string) {
   return name
-    .split(" ")
+    .trim()
+    .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((p) => p[0]?.toLocaleUpperCase("tr-TR"))

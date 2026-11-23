@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "lime" | "ink" | "paper" | "cobalt";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-950 disabled:cursor-not-allowed disabled:opacity-60";
+  "pressable inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink px-6 py-3 font-display text-[0.95rem] font-bold tracking-tight disabled:cursor-not-allowed disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
-  primary:
-    "bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 text-white shadow-[0_10px_40px_-12px_rgba(139,92,246,0.7)] hover:shadow-[0_16px_50px_-12px_rgba(34,211,238,0.6)] hover:-translate-y-0.5",
-  secondary:
-    "glass text-white hover:border-brand-400/50 hover:-translate-y-0.5",
-  ghost: "text-brand-200 hover:text-white hover:bg-white/5",
+  lime: "bg-lime text-ink",
+  ink: "bg-ink text-paper",
+  paper: "bg-paper text-ink",
+  cobalt: "bg-cobalt text-paper",
 };
 
 type Props = {
@@ -22,16 +21,16 @@ type Props = {
   external?: boolean;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
 
-export function Button({ href, variant = "primary", className, children, external, ...rest }: Props) {
+export function Button({ href, variant = "lime", className, children, external, ...rest }: Props) {
   const classes = cn(base, variants[variant], className);
+  if (href && external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={classes}>
+        {children}
+      </a>
+    );
+  }
   if (href) {
-    if (external) {
-      return (
-        <a href={href} target="_blank" rel="noopener noreferrer" className={classes}>
-          {children}
-        </a>
-      );
-    }
     return (
       <Link href={href} className={classes}>
         {children}

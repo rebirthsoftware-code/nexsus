@@ -1,112 +1,132 @@
 @import "tailwindcss";
 
+/*
+ * Nexus tasarım sistemi
+ * Fikir: "kampüs afişi". Krem kağıt zemin, mürekkep siyahı çizgiler ve her biri
+ * farklı bir bölümü temsil eden canlı renkler. Renkleri kulübün logosuna göre
+ * değiştirmek için aşağıdaki --color-* değerlerini güncellemek yeterlidir.
+ */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body), ui-sans-serif, sans-serif;
+  --font-serif: var(--font-serif-face), Georgia, serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
 
-  --color-night-950: #05070d;
-  --color-night-900: #0a0f1c;
-  --color-night-800: #111a2e;
-  --color-night-700: #1b2744;
-  --color-night-600: #28375c;
+  --color-paper: #f3eee3;
+  --color-paper-deep: #e7dfcd;
+  --color-ink: #14110f;
+  --color-ink-soft: #57504a;
+  --color-cobalt: #2d3fe7;
+  --color-coral: #ff5b38;
+  --color-lime: #c8f03c;
+  --color-lilac: #b9a2ff;
+  --color-sun: #ffc83d;
 
-  --color-brand-200: #ddd6fe;
-  --color-brand-300: #c4b5fd;
-  --color-brand-400: #a78bfa;
-  --color-brand-500: #8b5cf6;
-  --color-brand-600: #7c3aed;
-  --color-brand-700: #6d28d9;
+  --shadow-hard-sm: 3px 3px 0 0 var(--color-ink);
+  --shadow-hard: 5px 5px 0 0 var(--color-ink);
+  --shadow-hard-lg: 9px 9px 0 0 var(--color-ink);
 
-  --color-accent-300: #67e8f9;
-  --color-accent-400: #22d3ee;
-  --color-accent-500: #06b6d4;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-spin-slow: spin 20s linear infinite;
+  --animate-rise: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-stamp: stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 
-  --animate-float: float 9s ease-in-out infinite;
-  --animate-float-slow: float 14s ease-in-out infinite;
-  --animate-dash: dash 6s linear infinite;
-  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-shimmer: shimmer 2.5s linear infinite;
-
-  @keyframes float {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    50% { transform: translate3d(0, -18px, 0); }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
   }
-  @keyframes dash {
-    to { stroke-dashoffset: -200; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: none; }
   }
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(18px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.6) rotate(-12deg); }
+    to { opacity: 1; }
   }
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
+  @keyframes stamp {
+    from { opacity: 0; transform: scale(2.2) rotate(-24deg); }
+    to { opacity: 1; transform: scale(1) rotate(-12deg); }
   }
-}
-
-:root {
-  color-scheme: dark;
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--color-paper);
 }
 
 body {
-  background-color: var(--color-night-950);
-  color: #e5e7eb;
+  background-color: var(--color-paper);
+  /* Kağıt dokusu: çok hafif bir gren, sayfaya basılı malzeme hissi verir */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-brand-500) 60%, transparent);
-  color: white;
+  background: var(--color-lime);
+  color: var(--color-ink);
 }
 
-@utility text-gradient {
-  background-image: linear-gradient(100deg, var(--color-brand-300), var(--color-accent-300) 60%, #fff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+:focus-visible {
+  outline: 3px solid var(--color-cobalt);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
-@utility glass {
-  background: color-mix(in oklab, var(--color-night-800) 55%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgb(255 255 255 / 0.08);
-}
+/* --- Yardımcı sınıflar --- */
 
-@utility card {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.015));
-  border: 1px solid rgb(255 255 255 / 0.08);
-  border-radius: 1.25rem;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s, box-shadow 0.35s;
-}
-
-@utility card-hover {
+/* Basınca "içeri giren" sert gölgeli etkileşim */
+@utility pressable {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.18s;
+  box-shadow: var(--shadow-hard-sm);
   &:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in oklab, var(--color-brand-400) 45%, transparent);
-    box-shadow: 0 20px 60px -20px color-mix(in oklab, var(--color-brand-500) 50%, transparent);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hard);
+  }
+  &:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 0 var(--color-ink);
   }
 }
 
-@utility grid-bg {
-  background-image:
-    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+/* Kartların hover'da yerinden kalkması */
+@utility liftable {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), rotate 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  &:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: var(--shadow-hard-lg);
+  }
 }
 
-/* Scroll ile görünür olma animasyonu (Reveal bileşeni) */
-/* Yalnızca JS yüklendiğinde (html[data-js]) gizlenir; JS kapalıysa içerik her zaman görünür */
+@utility display-tight {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  /* text-* sınıfları kendi satır yüksekliğini dayatmasın diye --tw-leading de ayarlanır */
+  --tw-leading: 0.96;
+  line-height: 0.96;
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@utility dot-grid {
+  background-image: radial-gradient(circle, rgb(20 17 15 / 0.16) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+/* Scroll ile görünür olma (Reveal bileşeni). JS yoksa içerik hep görünür. */
 html[data-js] .reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
 html[data-js] .reveal.is-visible {
@@ -115,6 +135,11 @@ html[data-js] .reveal.is-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   html[data-js] .reveal { opacity: 1; transform: none; transition: none; }
-  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

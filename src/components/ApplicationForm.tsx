@@ -1,46 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2, Send, AlertCircle } from "lucide-react";
+import { AlertCircle, Clock3, Loader2, Send, ShieldCheck, Users2 } from "lucide-react";
 import { applicationSchema, interestOptions, classYears, type ApplicationInput } from "@/lib/schema";
+import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
+import { MemberCard } from "./MemberCard";
+import { Button } from "./Button";
 
 const inputCls =
-  "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-all focus:border-brand-400/70 focus:bg-white/[0.06] focus:ring-4 focus:ring-brand-500/15 aria-[invalid=true]:border-rose-400/70";
+  "w-full rounded-xl border-2 border-ink bg-white/60 px-4 py-3 text-base text-ink placeholder:text-ink/35 outline-none transition-all focus:bg-white focus:shadow-[4px_4px_0_0_var(--color-cobalt)] focus-visible:outline-none aria-[invalid=true]:border-coral aria-[invalid=true]:shadow-[4px_4px_0_0_var(--color-coral)]";
 
-function Field({ label, error, children, hint }: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
+const chipCls =
+  "block cursor-pointer rounded-full border-2 border-ink bg-paper px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 peer-checked:bg-lime peer-checked:shadow-hard-sm peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt";
+
+function ErrorText({ children }: { children?: string }) {
+  if (!children) return null;
+  return (
+    <span role="alert" className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[#c2330f]">
+      <AlertCircle className="h-4 w-4 shrink-0" /> {children}
+    </span>
+  );
+}
+
+function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-200">{label}</span>
+      <span className="mb-2 block font-display text-sm font-bold tracking-tight">{label}</span>
       {children}
-      {hint && !error && <span className="mt-1.5 block text-xs text-slate-500">{hint}</span>}
-      {error && (
-        <span role="alert" className="mt-1.5 flex items-center gap-1 text-xs text-rose-300">
-          <AlertCircle className="h-3.5 w-3.5" /> {error}
-        </span>
-      )}
+      {hint && !error && <span className="mt-2 block text-xs text-ink-soft">{hint}</span>}
+      <ErrorText>{error}</ErrorText>
     </label>
   );
 }
 
+function Legend({ n, children }: { n: string; children: React.ReactNode }) {
+  return (
+    <legend className="mb-5 flex w-full items-center gap-3 border-b-2 border-ink pb-3">
+      <span className="display-tight grid h-9 w-9 place-items-center rounded-full border-2 border-ink bg-sun text-lg">{n}</span>
+      <span className="font-display text-xl font-extrabold tracking-[-0.03em]">{children}</span>
+    </legend>
+  );
+}
+
+const perks = [
+  { Icon: Clock3, text: "İki dakika sürer" },
+  { Icon: Users2, text: "Bölüm ya da sınıf şartı yok" },
+  { Icon: ShieldCheck, text: "Bilgilerin yalnızca kulüp içinde kalır" },
+];
+
 export function ApplicationForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [serverMessage, setServerMessage] = useState("");
+  const [submitted, setSubmitted] = useState<Pick<ApplicationInput, "fullName" | "department" | "classYear" | "interests"> | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors },
   } = useForm<ApplicationInput>({
     resolver: zodResolver(applicationSchema),
     defaultValues: { interests: [], studentNo: "", website: "" },
   });
 
-  const motivation = watch("motivation") ?? "";
+  const [fullName, department, classYear, interests, motivation] = useWatch({
+    control,
+    name: ["fullName", "department", "classYear", "interests", "motivation"],
+  });
+
+  // Başvuru alındığında onay kartını görünür alana getir
+  const successRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (status === "success") successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [status]);
 
   const onSubmit = async (data: ApplicationInput) => {
     setStatus("sending");
@@ -53,6 +89,7 @@ export function ApplicationForm() {
       });
       const json = (await res.json()) as { ok: boolean; message?: string };
       if (!res.ok || !json.ok) throw new Error(json.message || "Başvuru gönderilemedi");
+      setSubmitted({ fullName: data.fullName, department: data.department, classYear: data.classYear, interests: data.interests });
       setStatus("success");
       reset();
     } catch (e) {
@@ -61,101 +98,136 @@ export function ApplicationForm() {
     }
   };
 
-  if (status === "success") {
+  if (status === "success" && submitted) {
     return (
-      <div className="card p-10 text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30">
-          <CheckCircle2 className="h-8 w-8" />
+      <div ref={successRef} className="grid items-center gap-12 rounded-[2rem] border-2 border-ink bg-lime p-8 shadow-hard-lg sm:p-14 lg:grid-cols-[19rem_1fr] lg:gap-16">
+        <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.interests} stamped />
+        <div role="status">
+          <p className="label-mono">Başvuru alındı</p>
+          <h2 className="display-tight mt-4 text-5xl sm:text-6xl">Hoş geldin, {submitted.fullName.trim().split(/\s+/)[0]}!</h2>
+          <p className="mt-5 max-w-md text-lg leading-relaxed">
+            Başvurun bize ulaştı. Ekipten biri en kısa sürede sana yazacak. O zamana kadar duyuruları kaçırmamak için Instagram&apos;da buluşalım.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button href={site.socials.instagram} variant="ink" external>
+              {site.instagramHandle}
+            </Button>
+            <Button href="/etkinlikler" variant="paper">
+              Etkinliklere göz at
+            </Button>
+          </div>
         </div>
-        <h2 className="mt-5 font-display text-2xl font-bold text-white">Başvurun bize ulaştı!</h2>
-        <p className="mx-auto mt-3 max-w-md text-slate-400">
-          Teşekkürler. Ekibimiz en kısa sürede e-posta veya WhatsApp üzerinden seninle iletişime geçecek. Bu arada
-          Instagram hesabımızı takip etmeyi unutma.
-        </p>
-        <button onClick={() => setStatus("idle")} className="mt-6 text-sm font-semibold text-brand-200 hover:text-white">
-          Yeni başvuru gönder
-        </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="card p-6 sm:p-10">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Ad Soyad" error={errors.fullName?.message}>
-          <input {...register("fullName")} className={inputCls} placeholder="Ayşe Yılmaz" autoComplete="name" aria-invalid={!!errors.fullName} />
-        </Field>
-        <Field label="E-posta" error={errors.email?.message} hint="Üniversite e-postanı kullanman önerilir">
-          <input {...register("email")} type="email" className={inputCls} placeholder="ad.soyad@ogrenci.karabuk.edu.tr" autoComplete="email" aria-invalid={!!errors.email} />
-        </Field>
-        <Field label="Telefon" error={errors.phone?.message}>
-          <input {...register("phone")} type="tel" className={inputCls} placeholder="05xx xxx xx xx" autoComplete="tel" aria-invalid={!!errors.phone} />
-        </Field>
-        <Field label="Öğrenci Numarası (isteğe bağlı)" error={errors.studentNo?.message}>
-          <input {...register("studentNo")} className={inputCls} placeholder="2024XXXXXX" inputMode="numeric" />
-        </Field>
-        <Field label="Fakülte / Bölüm" error={errors.department?.message}>
-          <input {...register("department")} className={inputCls} placeholder="Mühendislik Fakültesi / Bilgisayar Müh." aria-invalid={!!errors.department} />
-        </Field>
-        <Field label="Sınıf" error={errors.classYear?.message}>
-          <select {...register("classYear")} className={cn(inputCls, "appearance-none")} defaultValue="" aria-invalid={!!errors.classYear}>
-            <option value="" disabled className="bg-night-900">Seçiniz</option>
-            {classYears.map((c) => (
-              <option key={c} value={c} className="bg-night-900">{c}</option>
+    <div className="grid gap-12 lg:grid-cols-[21rem_1fr] lg:gap-16">
+      {/* Canlı üye kartı: form dolduruldukça güncellenir */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-28">
+          <MemberCard name={fullName} department={department} classYear={classYear} interests={interests} />
+          <p className="label-mono mt-8 text-center text-ink-soft">↑ sen yazdıkça kartın dolar</p>
+          <ul className="mt-6 space-y-2.5">
+            {perks.map(({ Icon, text }) => (
+              <li key={text} className="flex items-center gap-3 text-sm font-semibold">
+                <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-ink bg-paper" aria-hidden="true">
+                  <Icon className="h-4 w-4" />
+                </span>
+                {text}
+              </li>
             ))}
-          </select>
-        </Field>
-      </div>
-
-      <fieldset className="mt-7">
-        <legend className="mb-2 text-sm font-medium text-slate-200">Hangi alanlarda aktif olmak istersin?</legend>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {interestOptions.map((opt) => (
-            <label key={opt} className="group flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300 transition-all has-[:checked]:border-brand-400/60 has-[:checked]:bg-brand-500/10 has-[:checked]:text-white">
-              <input type="checkbox" value={opt} {...register("interests")} className="h-4 w-4 accent-brand-500" />
-              {opt}
-            </label>
-          ))}
+          </ul>
         </div>
-        {errors.interests && (
-          <p role="alert" className="mt-1.5 flex items-center gap-1 text-xs text-rose-300">
-            <AlertCircle className="h-3.5 w-3.5" /> {errors.interests.message}
-          </p>
+      </aside>
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-12 rounded-[2rem] border-2 border-ink bg-paper p-6 shadow-hard-lg sm:p-10">
+        <fieldset>
+          <Legend n="1">Seni tanıyalım</Legend>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Ad soyad" error={errors.fullName?.message}>
+              <input {...register("fullName")} className={inputCls} placeholder="Ayşe Yılmaz" autoComplete="name" aria-invalid={!!errors.fullName} />
+            </Field>
+            <Field label="E-posta" error={errors.email?.message}>
+              <input {...register("email")} type="email" className={inputCls} placeholder="ad.soyad@ogrenci.karabuk.edu.tr" autoComplete="email" aria-invalid={!!errors.email} />
+            </Field>
+            <Field label="Telefon" error={errors.phone?.message}>
+              <input {...register("phone")} type="tel" className={inputCls} placeholder="05xx xxx xx xx" autoComplete="tel" aria-invalid={!!errors.phone} />
+            </Field>
+            <Field label="Öğrenci numarası" hint="İsteğe bağlı" error={errors.studentNo?.message}>
+              <input {...register("studentNo")} className={inputCls} placeholder="2024XXXXXX" inputMode="numeric" />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Bölüm" error={errors.department?.message}>
+                <input {...register("department")} className={inputCls} placeholder="Bilgisayar Mühendisliği" aria-invalid={!!errors.department} />
+              </Field>
+            </div>
+          </div>
+
+          <div className="mt-6" role="radiogroup" aria-label="Sınıf">
+            <span className="mb-2 block font-display text-sm font-bold tracking-tight">Sınıf</span>
+            <div className="flex flex-wrap gap-2">
+              {classYears.map((c) => (
+                <label key={c}>
+                  <input type="radio" value={c} {...register("classYear")} className="peer sr-only" />
+                  <span className={chipCls}>{c}</span>
+                </label>
+              ))}
+            </div>
+            <ErrorText>{errors.classYear?.message}</ErrorText>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <Legend n="2">Nerede aktif olmak istersin?</Legend>
+          <div className="flex flex-wrap gap-2">
+            {interestOptions.map((opt) => (
+              <label key={opt}>
+                <input type="checkbox" value={opt} {...register("interests")} className="peer sr-only" />
+                <span className={chipCls}>{opt}</span>
+              </label>
+            ))}
+          </div>
+          <ErrorText>{errors.interests?.message}</ErrorText>
+        </fieldset>
+
+        <fieldset>
+          <Legend n="3">Son olarak</Legend>
+          <Field label="Neden Nexus?" error={errors.motivation?.message}>
+            <textarea
+              {...register("motivation")}
+              rows={5}
+              maxLength={1000}
+              className={cn(inputCls, "resize-y")}
+              placeholder="Kısaca kendinden, beklentilerinden ve kulübe neler katmak istediğinden bahset."
+              aria-invalid={!!errors.motivation}
+            />
+          </Field>
+          <p className="label-mono mt-2 text-right text-ink-soft">{(motivation ?? "").length}/1000</p>
+
+          {/* Bot koruması (gizli alan) */}
+          <input {...register("website")} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+
+          <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-ink-soft">
+            <input type="checkbox" {...register("consent")} className="mt-0.5 h-5 w-5 shrink-0 accent-[#14110f]" />
+            <span>
+              Paylaştığım bilgilerin yalnızca kulüp üyelik süreci ve etkinlik duyuruları için kullanılmasını kabul ediyorum.
+              <ErrorText>{errors.consent?.message}</ErrorText>
+            </span>
+          </label>
+        </fieldset>
+
+        {status === "error" && (
+          <div role="alert" className="flex items-center gap-2 rounded-xl border-2 border-ink bg-coral px-4 py-3 text-sm font-semibold">
+            <AlertCircle className="h-4 w-4 shrink-0" /> {serverMessage}
+          </div>
         )}
-      </fieldset>
 
-      <div className="mt-7">
-        <Field label="Neden Nexus'a katılmak istiyorsun?" error={errors.motivation?.message}>
-          <textarea {...register("motivation")} rows={5} className={cn(inputCls, "resize-y")} placeholder="Kısaca kendinden, beklentilerinden ve kulübe neler katabileceğinden bahset." aria-invalid={!!errors.motivation} />
-        </Field>
-        <p className="mt-1 text-right text-xs text-slate-500">{motivation.length}/1000</p>
-      </div>
-
-      {/* Bot koruması (gizli alan) */}
-      <input {...register("website")} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-
-      <label className="mt-5 flex items-start gap-3 text-sm text-slate-400">
-        <input type="checkbox" {...register("consent")} className="mt-0.5 h-4 w-4 accent-brand-500" />
-        <span>
-          Paylaştığım bilgilerin yalnızca kulüp üyelik süreci ve etkinlik duyuruları için kullanılmasını kabul ediyorum.
-          {errors.consent && <span role="alert" className="block text-rose-300">{errors.consent.message}</span>}
-        </span>
-      </label>
-
-      {status === "error" && (
-        <div role="alert" className="mt-5 flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          <AlertCircle className="h-4 w-4" /> {serverMessage}
-        </div>
-      )}
-
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-12px_rgba(139,92,246,0.7)] transition-all hover:-translate-y-0.5 disabled:opacity-60 sm:w-auto"
-      >
-        {status === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        {status === "sending" ? "Gönderiliyor..." : "Başvuruyu Gönder"}
-      </button>
-    </form>
+        <Button type="submit" disabled={status === "sending"} className="w-full px-8 py-4 text-base sm:w-auto">
+          {status === "sending" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+          {status === "sending" ? "Gönderiliyor..." : "Başvuruyu gönder"}
+        </Button>
+      </form>
+    </div>
   );
 }

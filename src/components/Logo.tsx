@@ -1,35 +1,43 @@
 import Link from "next/link";
 import { site } from "@/content/site";
+import { cn } from "@/lib/utils";
 
-/** Logo: public/logo.png eklerseniz onu kullanacak şekilde güncelleyebilirsiniz. */
-export function Logo({ className = "" }: { className?: string }) {
+/**
+ * Logo işareti: birbirine bağlı dört düğümden oluşan bir "N".
+ * Kulübün kendi logosu varsa public/logo.svg ekleyip burada <Image> ile değiştirin.
+ */
+export function LogoMark({ invert = false, className }: { invert?: boolean; className?: string }) {
+  const bg = invert ? "#f3eee3" : "#14110f";
+  const line = invert ? "#14110f" : "#f3eee3";
+  const dot = invert ? "#2d3fe7" : "#c8f03c";
   return (
-    <Link href="/" className={`group inline-flex items-center gap-2.5 ${className}`} aria-label={`${site.name} ana sayfa`}>
-      <span className="relative grid h-9 w-9 place-items-center">
-        <svg viewBox="0 0 40 40" className="h-9 w-9" aria-hidden="true">
-          <defs>
-            <linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#a78bfa" />
-              <stop offset="100%" stopColor="#22d3ee" />
-            </linearGradient>
-          </defs>
-          <g stroke="url(#logo-g)" strokeWidth="2" fill="none" strokeLinecap="round">
-            <path d="M8 32 L20 8 L32 32" />
-            <path d="M8 32 L32 8" opacity="0.5" />
-          </g>
-          <g fill="url(#logo-g)">
-            <circle cx="8" cy="32" r="3.5" />
-            <circle cx="20" cy="8" r="3.5" />
-            <circle cx="32" cy="32" r="3.5" />
-            <circle cx="32" cy="8" r="2.5" opacity="0.7" />
-          </g>
-        </svg>
-        <span className="absolute inset-0 -z-10 rounded-xl bg-brand-500/20 blur-lg transition-opacity opacity-0 group-hover:opacity-100" />
-      </span>
-      <span className="font-display text-lg font-bold tracking-tight text-white">
-        {site.name}
-        <span className="ml-1.5 hidden text-xs font-medium uppercase tracking-[0.2em] text-slate-400 sm:inline">KBÜ</span>
-      </span>
+    <svg viewBox="0 0 40 40" className={cn("h-9 w-9", className)} aria-hidden="true">
+      <circle cx="20" cy="20" r="20" fill={bg} />
+      <polyline points="13,28 13,12 27,28 27,12" fill="none" stroke={line} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      {[
+        [13, 28],
+        [13, 12],
+        [27, 28],
+        [27, 12],
+      ].map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="3.1" fill={dot} stroke={bg} strokeWidth="1.2" />
+      ))}
+    </svg>
+  );
+}
+
+export function Logo({ invert = false, className, asLink = true }: { invert?: boolean; className?: string; asLink?: boolean }) {
+  const inner = (
+    <>
+      <LogoMark invert={invert} />
+      <span className={cn("font-display text-xl font-extrabold tracking-[-0.04em]", invert ? "text-paper" : "text-ink")}>{site.name}</span>
+    </>
+  );
+  const classes = cn("inline-flex items-center gap-2.5", className);
+  if (!asLink) return <span className={classes}>{inner}</span>;
+  return (
+    <Link href="/" className={classes} aria-label={`${site.name} ana sayfa`}>
+      {inner}
     </Link>
   );
 }

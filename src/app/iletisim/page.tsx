@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, MessageCircle, ArrowUpRight } from "lucide-react";
-import { InstagramIcon, LinkedinIcon } from "@/components/icons";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Container } from "@/components/Container";
 import { Reveal } from "@/components/Reveal";
+import { Mark } from "@/components/Shapes";
 import { site } from "@/content/site";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "İletişim",
@@ -13,45 +14,60 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   const channels = [
-    { Icon: InstagramIcon, title: "Instagram", value: "@nexuskarabukuni", href: site.socials.instagram, text: "Duyurular ve etkinlik paylaşımları için en hızlı kanal." },
-    { Icon: Mail, title: "E-posta", value: site.email, href: `mailto:${site.email}`, text: "İş birliği, sponsorluk ve resmi yazışmalar." },
-    site.socials.linkedin && { Icon: LinkedinIcon, title: "LinkedIn", value: "Nexus KBÜ", href: site.socials.linkedin, text: "Kurumsal iletişim ve mezun ağı." },
-    site.socials.whatsapp && { Icon: MessageCircle, title: "WhatsApp Topluluğu", value: "Katıl", href: site.socials.whatsapp, text: "Üyelerimizin anlık duyuru kanalı." },
-  ].filter(Boolean) as Array<{ Icon: typeof Mail; title: string; value: string; href: string; text: string }>;
+    { title: "Instagram", value: site.instagramHandle, href: site.socials.instagram, note: "Duyurular ve en hızlı cevap", hover: "hover:bg-coral" },
+    { title: "E-posta", value: site.email, href: `mailto:${site.email}`, note: "İş birliği, sponsorluk, resmi yazışma", hover: "hover:bg-lime" },
+    site.socials.linkedin && { title: "LinkedIn", value: "Nexus KBÜ", href: site.socials.linkedin, note: "Mezun ağı ve kurumsal iletişim", hover: "hover:bg-lilac" },
+    site.socials.whatsapp && { title: "WhatsApp", value: "Topluluğa katıl", href: site.socials.whatsapp, note: "Üyelerin anlık duyuru kanalı", hover: "hover:bg-sun" },
+  ].filter(Boolean) as Array<{ title: string; value: string; href: string; note: string; hover: string }>;
 
   return (
     <>
-      <PageHeader eyebrow="İletişim" title="Bize ulaşın" description="Soru, öneri veya iş birliği teklifin mi var? Aşağıdaki kanallardan herhangi biriyle yazabilirsin." />
+      <PageHeader
+        eyebrow="İletişim"
+        title={
+          <>
+            Bir mesaj <Mark className="bg-sun">uzağız.</Mark>
+          </>
+        }
+        description="Soru, öneri ya da iş birliği fikrin mi var? Hangisi kolayına gelirse oradan yaz."
+      />
       <Container>
-        <div className="grid gap-5 md:grid-cols-2">
+        <ul className="border-t-2 border-ink">
           {channels.map((c, i) => (
-            <Reveal key={c.title} delay={i * 80}>
-              <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="card card-hover group flex items-start gap-4 p-6">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 text-brand-200 ring-1 ring-white/10">
-                  <c.Icon className="h-5.5 w-5.5" />
-                </span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-display text-lg font-semibold text-white">{c.title}</h2>
-                    <ArrowUpRight className="h-4 w-4 text-slate-500 transition-all group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </div>
-                  <p className="text-sm font-medium text-brand-200">{c.value}</p>
-                  <p className="mt-1 text-sm text-slate-400">{c.text}</p>
+            <Reveal as="li" key={c.title} delay={i * 80} className="border-b-2 border-ink">
+              <a
+                href={c.href}
+                target={c.href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className={cn("group flex flex-col gap-2 px-2 py-8 transition-colors sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-10", c.hover)}
+              >
+                <div>
+                  <p className="label-mono text-ink-soft group-hover:text-ink">
+                    0{i + 1} · {c.note}
+                  </p>
+                  <p className="display-tight mt-2 text-4xl sm:text-6xl">{c.title}</p>
                 </div>
+                <p className="flex items-center gap-3 break-all font-display text-lg font-bold tracking-tight sm:text-2xl">
+                  {c.value}
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-ink bg-paper transition-transform duration-300 group-hover:rotate-45">
+                    <ArrowUpRight className="h-6 w-6" />
+                  </span>
+                </p>
               </a>
             </Reveal>
           ))}
-          <Reveal delay={channels.length * 80} className="card flex items-start gap-4 p-6 md:col-span-2">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500/30 to-accent-500/20 text-brand-200 ring-1 ring-white/10">
-              <MapPin className="h-5.5 w-5.5" />
-            </span>
-            <div>
-              <h2 className="font-display text-lg font-semibold text-white">Adres</h2>
-              <p className="mt-1 text-sm text-slate-400">{site.location}</p>
-              <p className="mt-1 text-xs text-slate-500">Kulüp odası ve etkinlik salonu bilgileri her etkinlik duyurusunda ayrıca paylaşılır.</p>
-            </div>
-          </Reveal>
-        </div>
+        </ul>
+
+        <Reveal className="mt-12 flex items-start gap-4 rounded-[1.75rem] border-2 border-ink bg-paper-deep p-6 shadow-hard sm:p-8">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-ink bg-sun" aria-hidden="true">
+            <MapPin className="h-6 w-6" />
+          </span>
+          <div>
+            <h2 className="font-display text-2xl font-extrabold tracking-[-0.03em]">Bizi kampüste bul</h2>
+            <p className="mt-1 text-lg text-ink-soft">{site.location}</p>
+            <p className="mt-1 text-sm text-ink-soft">Salon ve saat bilgisi her etkinlik duyurusunda ayrıca paylaşılır.</p>
+          </div>
+        </Reveal>
       </Container>
     </>
   );
