@@ -1,13 +1,21 @@
 import { z } from "zod";
 
-export const interestOptions = [
-  "Kariyer & Sertifika Programları",
-  "Etkinlik Organizasyonu",
-  "Sosyal Medya & Tasarım",
-  "Sponsorluk & İletişim",
-  "Teknoloji & Yazılım",
-  "Sosyal Sorumluluk",
+/**
+ * "Kulüpte en çok ne ilgini çekiyor?" sorusunun seçenekleri.
+ * Bu form kulübe ÜYELİK içindir; ekipte görev almak için ayrı başvuru açılır.
+ * `chip`, üye kartı önizlemesinde görünen kısa addır.
+ */
+export const attractions = [
+  { value: "Eğitimler", chip: "Eğitim" },
+  { value: "Atölye çalışmaları", chip: "Atölye" },
+  { value: "Söyleşiler", chip: "Söyleşi" },
+  { value: "Sertifika programları", chip: "Sertifika" },
+  { value: "Sosyal etkinlikler", chip: "Sosyal" },
+  { value: "Yeni insanlarla tanışmak", chip: "Tanışma" },
+  { value: "Üyelere özel avantajlar", chip: "Avantaj" },
 ] as const;
+
+export const attractionOptions = attractions.map((a) => a.value) as [string, ...string[]];
 
 export const classYears = ["Hazırlık", "1. Sınıf", "2. Sınıf", "3. Sınıf", "4. Sınıf", "Yüksek Lisans / Doktora"] as const;
 
@@ -26,8 +34,9 @@ export const applicationSchema = z.object({
     .max(20)
     .optional()
     .or(z.literal("")),
-  interests: z.array(z.enum(interestOptions)).min(1, "En az bir ilgi alanı seçin"),
-  motivation: z.string().trim().min(20, "Biraz daha detay verir misin? (en az 20 karakter)").max(1000),
+  attractions: z.array(z.enum(attractionOptions)).min(1, "En az birini seç"),
+  /** İsteğe bağlı açık uçlu not */
+  note: z.string().trim().max(500, "En fazla 500 karakter").optional().or(z.literal("")),
   consent: z.literal(true, { message: "Devam etmek için onay vermelisiniz" }),
   /** Bot koruması: gerçek kullanıcılar bu alanı görmez ve boş bırakır */
   website: z.string().max(0).optional(),

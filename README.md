@@ -55,7 +55,7 @@ npm run lint
 | Ekip üyeleri (isim, görev, bölüm, renk, klip, fotoğraf) | `src/content/team.ts` – dosyalar `public/team/` |
 | Etkinlikler | `src/content/events.ts` |
 | Sıkça sorulan sorular | `src/content/faq.ts` |
-| Form alanları ve ilgi alanları | `src/lib/schema.ts` |
+| Üyelik formu alanları ve "en çok ne ilgini çekiyor" seçenekleri | `src/lib/schema.ts` |
 
 ## Yayın (GitHub Pages)
 
@@ -109,7 +109,7 @@ Google Sheets'e kaydetmek için:
      const d = JSON.parse(e.postData.contents);
      SpreadsheetApp.getActiveSheet().appendRow([
        new Date(), d.fullName, d.email, d.phone, d.department, d.classYear,
-       d.studentNo, (d.interests || []).join(", "), d.motivation,
+       d.studentNo, (d.attractions || []).join(", "), d.note,
      ]);
      return ContentService.createTextOutput("ok");
    }

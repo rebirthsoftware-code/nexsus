@@ -13,7 +13,7 @@ export const faq = [
   },
   {
     q: "Ekipte görev alabilir miyim?",
-    a: "Evet. Her dönem koordinatörlük ekipleri için başvuru açılır. Başvuru formunda ilgilendiğin alanı işaretlemen yeterli, gerisini tanışma buluşmasında konuşuruz.",
+    a: "Evet, ama üyelikten ayrı bir süreç. Önce üye olursun; her dönem koordinatörlük ekipleri için ayrıca başvuru açılır ve duyurusu üyelere yapılır.",
   },
   {
     q: "Etkinliklerden nasıl haberdar olurum?",

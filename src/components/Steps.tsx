@@ -2,9 +2,9 @@ import { Reveal } from "./Reveal";
 import { cn } from "@/lib/utils";
 
 const steps = [
-  { n: "1", title: "Formu doldur", text: "İki dakikalık başvuru formunda kendini ve ilgi alanlarını anlat.", cls: "bg-brand text-paper" },
-  { n: "2", title: "Tanışmaya gel", text: "Ekipten biri sana yazar; ilk buluşmada yüz yüze tanışırız.", cls: "bg-sun" },
-  { n: "3", title: "Ekibini seç", text: "Etkinlik, tasarım, kariyer… Sana uyan ekipte hemen işe koyul.", cls: "bg-coral" },
+  { n: "1", title: "Formu doldur", text: "İki dakikalık üyelik formunda kendini tanıt, nelerle ilgilendiğini seç.", cls: "bg-brand text-paper" },
+  { n: "2", title: "Duyuruları al", text: "Üyeliğin onaylanınca etkinlik duyuruları ilk sana ulaşır.", cls: "bg-sun" },
+  { n: "3", title: "Etkinliklere katıl", text: "Eğitimler, atölyeler, söyleşiler… Sana uyanı seç, yerini ayırt.", cls: "bg-coral" },
 ];
 
 /** Üyelik adımları: birbirine çizgiyle bağlı üç düğüm */

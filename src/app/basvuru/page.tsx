@@ -19,7 +19,7 @@ export default function ApplyPage() {
             Kartını <Mark>bastıralım.</Mark>
           </>
         }
-        description="Formu doldur, ekipten biri sana yazsın. Üyelik ücretsiz ve tüm bölümlere açık."
+        description="Bu form kulübe üyelik içindir: formu doldur, etkinliklerden ilk sen haberdar ol. Üyelik ücretsiz ve tüm bölümlere açık."
       />
       <Container>
         <ApplicationForm />

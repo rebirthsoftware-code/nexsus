@@ -51,7 +51,7 @@ export function MemberCard({
           <ul className="mt-4 flex min-h-[1.9rem] flex-wrap gap-1.5">
             {(interests ?? []).map((x) => (
               <li key={x} className="animate-pop rounded-full border-2 border-ink bg-sun px-2 py-0.5 text-[0.7rem] font-semibold">
-                {x.split(" ")[0]}
+                {x}
               </li>
             ))}
           </ul>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Clock3, Loader2, Send, ShieldCheck, Users2 } from "lucide-react";
-import { applicationSchema, interestOptions, classYears, type ApplicationInput } from "@/lib/schema";
+import { applicationSchema, attractions, classYears, type ApplicationInput } from "@/lib/schema";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { MemberCard } from "./MemberCard";
@@ -51,11 +51,17 @@ function Legend({ n, children }: { n: string; children: React.ReactNode }) {
  */
 const ENDPOINT = process.env.NEXT_PUBLIC_APPLICATION_ENDPOINT;
 
-type Submitted = Pick<ApplicationInput, "fullName" | "department" | "classYear" | "interests"> & {
+type Submitted = Pick<ApplicationInput, "fullName" | "department" | "classYear"> & {
+  chips: string[];
   /** sent: uç noktaya kaydedildi · manual: metin hazırlandı, kullanıcı Instagram'dan gönderecek */
   mode: "sent" | "manual";
   summary: string;
 };
+
+/** Seçilen seçenekleri üye kartındaki kısa etiketlere çevirir */
+function toChips(values: readonly string[] | undefined) {
+  return attractions.filter((a) => values?.includes(a.value)).map((a) => a.chip);
+}
 
 function summarize(d: Omit<ApplicationInput, "website" | "consent">) {
   return [
@@ -65,8 +71,8 @@ function summarize(d: Omit<ApplicationInput, "website" | "consent">) {
     d.studentNo ? `Öğrenci no: ${d.studentNo}` : null,
     `E-posta: ${d.email}`,
     `Telefon: ${d.phone}`,
-    `İlgi alanları: ${d.interests.join(", ")}`,
-    `Neden Nexus: ${d.motivation}`,
+    `En çok ilgisini çeken: ${d.attractions.join(", ")}`,
+    d.note ? `Not: ${d.note}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -92,13 +98,14 @@ export function ApplicationForm() {
     formState: { errors },
   } = useForm<ApplicationInput>({
     resolver: zodResolver(applicationSchema),
-    defaultValues: { interests: [], studentNo: "", website: "" },
+    defaultValues: { attractions: [], note: "", studentNo: "", website: "" },
   });
 
-  const [fullName, department, classYear, interests, motivation] = useWatch({
+  const [fullName, department, classYear, selected, note] = useWatch({
     control,
-    name: ["fullName", "department", "classYear", "interests", "motivation"],
+    name: ["fullName", "department", "classYear", "attractions", "note"],
   });
+  const chips = toChips(selected);
 
   // Başvuru alındığında onay kartını görünür alana getir
   const successRef = useRef<HTMLDivElement>(null);
@@ -120,7 +127,7 @@ export function ApplicationForm() {
     setServerMessage("");
     const { website, consent, ...application } = data;
     void consent;
-    const card = { fullName: data.fullName, department: data.department, classYear: data.classYear, interests: data.interests };
+    const card = { fullName: data.fullName, department: data.department, classYear: data.classYear, chips: toChips(data.attractions) };
 
     // Bot koruması: gizli alan doluysa hiçbir şey göndermeden "başarılı" görün
     if (website) {
@@ -160,7 +167,7 @@ export function ApplicationForm() {
     const manual = submitted.mode === "manual";
     return (
       <div ref={successRef} className="grid items-center gap-12 rounded-[2rem] border-2 border-ink bg-brand p-8 text-paper shadow-hard-lg sm:p-14 lg:grid-cols-[19rem_1fr] lg:gap-16">
-        <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.interests} stamped={!manual} />
+        <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.chips} stamped={!manual} />
         <div role="status">
           <p className="label-mono">{manual ? "Son bir adım" : "Başvuru alındı"}</p>
           <h2 className="display-tight mt-4 text-5xl sm:text-6xl">{manual ? `Başvurun hazır, ${firstName}!` : `Hoş geldin, ${firstName}!`}</h2>
@@ -204,7 +211,7 @@ export function ApplicationForm() {
       {/* Canlı üye kartı: form dolduruldukça güncellenir */}
       <aside className="hidden lg:block">
         <div className="sticky top-28">
-          <MemberCard name={fullName} department={department} classYear={classYear} interests={interests} />
+          <MemberCard name={fullName} department={department} classYear={classYear} interests={chips} />
           <p className="label-mono mt-8 text-center text-ink-soft">↑ sen yazdıkça kartın dolar</p>
           <ul className="mt-6 space-y-2.5">
             {perks.map(({ Icon, text }) => (
@@ -257,31 +264,32 @@ export function ApplicationForm() {
         </fieldset>
 
         <fieldset>
-          <Legend n="2">Nerede aktif olmak istersin?</Legend>
+          <Legend n="2">Kulüpte en çok ne ilgini çekiyor?</Legend>
+          <p className="-mt-2 mb-4 text-sm text-ink-soft">Birden fazla seçebilirsin. Etkinlikleri buna göre planlıyoruz.</p>
           <div className="flex flex-wrap gap-2">
-            {interestOptions.map((opt) => (
-              <label key={opt}>
-                <input type="checkbox" value={opt} {...register("interests")} className="peer sr-only" />
-                <span className={chipCls}>{opt}</span>
+            {attractions.map((opt) => (
+              <label key={opt.value}>
+                <input type="checkbox" value={opt.value} {...register("attractions")} className="peer sr-only" />
+                <span className={chipCls}>{opt.value}</span>
               </label>
             ))}
           </div>
-          <ErrorText>{errors.interests?.message}</ErrorText>
+          <ErrorText>{errors.attractions?.message}</ErrorText>
         </fieldset>
 
         <fieldset>
           <Legend n="3">Son olarak</Legend>
-          <Field label="Neden Nexus?" error={errors.motivation?.message}>
+          <Field label="Eklemek istediğin bir şey var mı?" hint="İsteğe bağlı" error={errors.note?.message}>
             <textarea
-              {...register("motivation")}
-              rows={5}
-              maxLength={1000}
+              {...register("note")}
+              rows={3}
+              maxLength={500}
               className={cn(inputCls, "resize-y")}
-              placeholder="Kısaca kendinden, beklentilerinden ve kulübe neler katmak istediğinden bahset."
-              aria-invalid={!!errors.motivation}
+              placeholder="Görmek istediğin bir eğitim, merak ettiğin bir konu, aklındaki bir soru..."
+              aria-invalid={!!errors.note}
             />
           </Field>
-          <p className="label-mono mt-2 text-right text-ink-soft">{(motivation ?? "").length}/1000</p>
+          <p className="label-mono mt-2 text-right text-ink-soft">{(note ?? "").length}/500</p>
 
           {/* Bot koruması (gizli alan) */}
           <input {...register("website")} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />

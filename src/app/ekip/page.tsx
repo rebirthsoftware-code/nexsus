@@ -54,10 +54,10 @@ export default function TeamPage() {
               <h2 className="display-tight mt-3 text-4xl sm:text-5xl">
                 Bir sonraki kart <span className="font-serif font-normal italic tracking-[-0.02em] text-brand">senin</span> olabilir.
               </h2>
-              <p className="mt-3 max-w-lg text-lg leading-relaxed text-ink-soft">Her dönem koordinatörlük ekiplerine yeni arkadaşlar arıyoruz.</p>
+              <p className="mt-3 max-w-lg text-lg leading-relaxed text-ink-soft">Ekip başvuruları her dönem ayrıca açılır ve önce üyelere duyurulur. İlk adım kulübe üye olmak.</p>
             </div>
             <Button href="/basvuru" className="shrink-0 px-7 py-3.5 text-base">
-              Ekibe katıl <ArrowRight className="h-5 w-5" />
+              Üye ol <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
         </Reveal>
