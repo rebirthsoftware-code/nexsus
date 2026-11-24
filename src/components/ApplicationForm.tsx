@@ -46,10 +46,51 @@ function Legend({ n, children }: { n: string; children: React.ReactNode }) {
 }
 
 /**
- * Başvuruların kaydedileceği adres (ör. Google Sheets'e yazan bir Apps Script web uygulaması).
- * Tanımlı değilse form, başvuru metnini hazırlayıp Instagram mesajı olarak göndermeye yönlendirir.
+ * Yedek seçenek: başvuruların gönderileceği özel bir adres (ör. Google Sheets'e yazan Apps Script).
+ * Ne veritabanı ne de bu adres tanımlıysa form, başvuru metnini hazırlayıp Instagram mesajına yönlendirir.
  */
 const ENDPOINT = process.env.NEXT_PUBLIC_APPLICATION_ENDPOINT;
+
+/**
+ * Yönetim panelinin veritabanı (Supabase). Tanımlıysa başvurular doğrudan oraya yazılır ve
+ * panelde görünür. Buradaki anahtar herkese açıktır; ziyaretçiler yalnızca başvuru ekleyebilir,
+ * hiçbir kaydı okuyamaz (kurallar veritabanında tanımlıdır, bkz. supabase/schema.sql).
+ */
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const CAN_SUBMIT = Boolean((SUPABASE_URL && SUPABASE_ANON_KEY) || ENDPOINT);
+
+const SAVE_ERROR = "Başvuru şu an kaydedilemedi, lütfen biraz sonra tekrar dene.";
+
+async function saveApplication(a: Omit<ApplicationInput, "website" | "consent">) {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({
+        full_name: a.fullName,
+        email: a.email,
+        phone: a.phone,
+        department: a.department,
+        class_year: a.classYear,
+        student_no: a.studentNo || null,
+        attractions: a.attractions,
+        note: a.note || null,
+      }),
+    });
+    if (!res.ok) throw new Error(SAVE_ERROR);
+    return;
+  }
+  if (ENDPOINT) {
+    // "text/plain" gövde, Google Apps Script gibi basit uç noktaların ön kontrol (preflight) istemeden kabul etmesini sağlar
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ ...a, submittedAt: new Date().toISOString(), source: "nexus-web" }),
+    });
+    if (!res.ok) throw new Error(SAVE_ERROR);
+  }
+}
 
 type Submitted = Pick<ApplicationInput, "fullName" | "department" | "classYear"> & {
   chips: string[];
@@ -137,7 +178,7 @@ export function ApplicationForm() {
     }
 
     // Kayıt adresi tanımlı değilse başvuru metni hazırlanır ve Instagram mesajı olarak gönderilir
-    if (!ENDPOINT) {
+    if (!CAN_SUBMIT) {
       const summary = summarize(application);
       await copySummary(summary);
       setSubmitted({ ...card, mode: "manual", summary });
@@ -146,19 +187,14 @@ export function ApplicationForm() {
     }
 
     try {
-      // "text/plain" gövde, Google Apps Script gibi basit uç noktaların ön kontrol (preflight) istemeden kabul etmesini sağlar
-      const res = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ ...application, submittedAt: new Date().toISOString(), source: "nexus-web" }),
-      });
-      if (!res.ok) throw new Error("Başvuru şu an kaydedilemedi, lütfen biraz sonra tekrar dene.");
+      await saveApplication(application);
       setSubmitted({ ...card, mode: "sent", summary: "" });
       setStatus("success");
       reset();
     } catch (e) {
       setStatus("error");
-      setServerMessage(e instanceof Error && e.message ? e.message : "Bir şeyler ters gitti");
+      // Ağ hatalarında tarayıcının İngilizce iletisi yerine anlaşılır bir açıklama göster
+      setServerMessage(e instanceof Error && e.message === SAVE_ERROR ? SAVE_ERROR : "Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.");
     }
   };
 
@@ -311,9 +347,9 @@ export function ApplicationForm() {
 
         <Button type="submit" disabled={status === "sending"} className="w-full px-8 py-4 text-base sm:w-auto">
           {status === "sending" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          {status === "sending" ? "Gönderiliyor..." : ENDPOINT ? "Başvuruyu gönder" : "Başvurumu hazırla"}
+          {status === "sending" ? "Gönderiliyor..." : CAN_SUBMIT ? "Başvuruyu gönder" : "Başvurumu hazırla"}
         </Button>
-        {!ENDPOINT && <p className="text-sm text-ink-soft">Başvurun bir metin olarak hazırlanır; son adımda Instagram mesajıyla bize gönderirsin.</p>}
+        {!CAN_SUBMIT && <p className="text-sm text-ink-soft">Başvurun bir metin olarak hazırlanır; son adımda Instagram mesajıyla bize gönderirsin.</p>}
       </form>
     </div>
   );

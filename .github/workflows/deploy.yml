@@ -40,7 +40,11 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
-          # Depo ayarlarında (Settings → Secrets and variables → Actions → Variables) tanımlanır
+          # Aşağıdakiler depo ayarlarında tanımlanır: Settings → Secrets and variables → Actions → Variables
+          # Hepsi herkese açık değerlerdir (gizli anahtarlar buraya yazılmaz). Kurulum: docs/YONETIM-PANELI-KURULUM.md
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
           NEXT_PUBLIC_APPLICATION_ENDPOINT: ${{ vars.APPLICATION_ENDPOINT }}
       - uses: actions/upload-pages-artifact@v4
         with:

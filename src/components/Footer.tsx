@@ -92,7 +92,12 @@ export function Footer() {
           <p>
             © {site.foundedYear}–<Year fallback={site.foundedYear + 2} /> {site.fullName} · {site.university}
           </p>
-          <p className="label-mono">Öğrenciler tarafından, öğrenciler için</p>
+          <p className="label-mono flex items-center gap-4">
+            Öğrenciler tarafından, öğrenciler için
+            <Link href="/admin" className="underline decoration-paper/30 underline-offset-4 hover:text-paper">
+              Yönetim
+            </Link>
+          </p>
         </Container>
       </div>
     </footer>

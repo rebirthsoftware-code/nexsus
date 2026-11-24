@@ -73,6 +73,27 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 
 `src/content/site.ts` içindeki `preview: true` iken sitede "Önizleme" şeridi görünür ve site arama motorlarına kapalıdır. Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirildikten sonra `false` yapın.
 
+## Yönetim paneli
+
+`/admin` adresinde üyelik başvurularının yönetildiği bir panel vardır. Telefona ve bilgisayara uygulama olarak yüklenebilir (PWA) ve yeni başvurularda bildirim gönderir.
+
+- **Giriş:** e-posta ve şifre. Yalnızca yönetici listesindeki hesaplar veri görebilir.
+- **Özet:** yeni, toplam ve onaylanan başvuru sayıları, son 14 günün grafiği, en çok ilgi çeken konular.
+- **Başvurular:** arama, duruma göre filtre, ayrıntı, tek dokunuşla arama / WhatsApp / e-posta, durum ve yönetici notu, silme, Excel'e aktarma.
+- **Ayarlar:** bildirimler, uygulamayı yükleme, hesap.
+
+Veritabanı bağlanana kadar panel **demo modunda** çalışır: kurgusal başvurular gösterir ve veriler yalnızca o cihazda durur. Gerçek kurulum için: **[docs/YONETIM-PANELI-KURULUM.md](docs/YONETIM-PANELI-KURULUM.md)**
+
+Teknik yapı:
+
+| Parça | Yer |
+| --- | --- |
+| Panel arayüzü | `src/admin/components/` |
+| Veri katmanı (demo ve Supabase) | `src/admin/backend*.ts` |
+| Bildirim ve uygulama yükleme | `src/admin/push.ts`, `public/admin-sw.js`, `src/app/admin/manifest.webmanifest/` |
+| Veritabanı şeması ve erişim kuralları | `supabase/schema.sql` |
+| Bildirim gönderen sunucu fonksiyonu | `supabase/functions/yeni-basvuru-bildirimi/` |
+
 ## Ekip klipleri (GIF gibi dönen videolar)
 
 Ekip kartlarında her üye için kısa, sessiz, döngülü bir klip gösterilebilir. Gerçek GIF yerine MP4 kullanılır: aynı görüntü yaklaşık 10 kat daha küçük dosyayla gelir ve telefonda da kendiliğinden oynar. Klipler yalnızca ekranda görünürken oynar, her kartta durdur/oynat düğmesi vardır.
@@ -95,30 +116,11 @@ Hesaplar `src/content/site.ts` içindeki `socials` ve `socialAccounts` alanları
 
 ## Başvuruların toplanması
 
-Site statik olduğu için başvurular tarayıcıdan doğrudan bir kayıt adresine gönderilir.
+Site statik olduğu için başvurular tarayıcıdan doğrudan kayıt yerine gönderilir. Öncelik sırası:
 
-- **Kayıt adresi tanımlı değilse** (şu anki durum): form başvuru metnini hazırlar, panoya kopyalar ve kullanıcıyı kulübün Instagram mesajlarına yönlendirir.
-- **Kayıt adresi tanımlıysa**: başvuru JSON olarak o adrese gönderilir ve kullanıcı "Başvuru alındı" ekranını görür.
-
-Google Sheets'e kaydetmek için:
-
-1. Bir Google Tablosu açın, **Uzantılar → Apps Script** ile şu kodu ekleyin:
-
-   ```js
-   function doPost(e) {
-     const d = JSON.parse(e.postData.contents);
-     SpreadsheetApp.getActiveSheet().appendRow([
-       new Date(), d.fullName, d.email, d.phone, d.department, d.classYear,
-       d.studentNo, (d.attractions || []).join(", "), d.note,
-     ]);
-     return ContentService.createTextOutput("ok");
-   }
-   ```
-
-2. **Dağıt → Yeni dağıtım → Web uygulaması**, erişim: "Herkes". Verilen adresi kopyalayın.
-3. GitHub deposunda **Settings → Secrets and variables → Actions → Variables** altında `APPLICATION_ENDPOINT` adıyla bu adresi ekleyin ve yayın iş akışını yeniden çalıştırın.
-
-Yerelde denemek için aynı adresi `.env.local` dosyasına `NEXT_PUBLIC_APPLICATION_ENDPOINT` olarak yazın.
+1. **Veritabanı bağlıysa** (yönetim paneli kurulumu yapıldıysa): başvuru veritabanına yazılır ve panelde görünür.
+2. **Özel bir kayıt adresi tanımlıysa** (`APPLICATION_ENDPOINT` değişkeni, ör. Google Sheets'e yazan bir Apps Script): başvuru JSON olarak oraya gönderilir.
+3. **Hiçbiri yoksa** (şu anki durum): form başvuru metnini hazırlar, panoya kopyalar ve kullanıcıyı kulübün Instagram mesajlarına yönlendirir.
 
 ## Yapı
 
@@ -127,6 +129,9 @@ src/
   app/            sayfalar (/, /hakkimizda, /etkinlikler, /ekip, /basvuru, /iletisim) ve kapak görseli
   components/     bileşenler (ConnectionMap, EventTicket, TeamCard, MemberCard, ApplicationForm ...)
   content/        tüm metin ve veri içeriği
+  admin/          yönetim paneli (arayüz, veri katmanı, bildirimler)
   lib/            zod şeması, tarih ve renk yardımcıları
   assets/         kapak görselinde kullanılan yazı tipi
+supabase/         veritabanı şeması ve bildirim fonksiyonu
+docs/             kurulum rehberleri
 ```
