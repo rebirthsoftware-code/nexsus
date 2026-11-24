@@ -2,18 +2,14 @@ import Image from "next/image";
 import wordmarkLight from "../../public/brand/nexus-wordmark-light.png";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin } from "lucide-react";
-import { site, navLinks } from "@/content/site";
+import { site, navLinks, socialAccounts } from "@/content/site";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 import { Year } from "./Year";
-import { InstagramIcon, LinkedinIcon, YoutubeIcon } from "./icons";
+import { InstagramIcon, socialIcons } from "./icons";
 
 export function Footer() {
-  const socials = [
-    { href: site.socials.instagram, label: "Instagram", Icon: InstagramIcon },
-    { href: site.socials.linkedin, label: "LinkedIn", Icon: LinkedinIcon },
-    { href: site.socials.youtube, label: "YouTube", Icon: YoutubeIcon },
-  ].filter((s) => s.href);
+  const socials = socialAccounts.map((a) => ({ href: a.href, label: a.name, Icon: socialIcons[a.key] }));
 
   return (
     <footer className="relative mt-28 overflow-hidden rounded-t-[2rem] bg-navy text-paper sm:rounded-t-[3rem]">

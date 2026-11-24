@@ -8,7 +8,7 @@ Karabük Üniversitesi **Nexus** öğrenci kulübünün tanıtım sitesi. Nexus 
 
 - **Bağlantı haritası** (ana sayfa): Canvas ile çizilen etkileşimli ağ. Her etiket bir bölüm, ortadaki düğüm Nexus logosunun X işareti. İmleç "Sen" düğümüdür; yaklaştığı bölümlerle bağ kurar ve sayaç güncellenir.
 - **Bilet görünümlü etkinlik kartları**: tarih koçanı, kategori rengi ve "X gün kaldı" sayacı. Site her gece yeniden derlendiği için tarihi geçen etkinlik kendiliğinden "geçmiş"e düşer.
-- **Yaka kartı görünümlü ekip kartları**.
+- **Afiş tarzı ekip kartları**: her üyenin GIF gibi dönen kısa klibi, altında etiket gibi yapıştırılmış isim ve görev.
 - **Canlı üye kartı** (başvuru sayfası): form doldurulurken kart anında güncellenir, gönderince üzerine "Başvuru alındı" damgası basılır.
 
 Renkler ve yazı tipleri tek yerden yönetilir: `src/app/globals.css` içindeki `@theme` bloğu. Ana renkler kulüp logosundan ölçülmüştür: mavi `#015efb`, lacivert `#011e45` ve siyah. Limon, mercan, sarı ve lila farklı bölümleri temsil eden yardımcı vurgulardır.
@@ -52,7 +52,7 @@ npm run lint
 | Ne | Dosya |
 | --- | --- |
 | Kulüp adı, açıklama, e-posta, sosyal medya, istatistikler, bölüm listesi | `src/content/site.ts` |
-| Ekip üyeleri (isim, görev, bölüm, renk, fotoğraf) | `src/content/team.ts` – fotoğraflar `public/team/` |
+| Ekip üyeleri (isim, görev, bölüm, renk, klip, fotoğraf) | `src/content/team.ts` – dosyalar `public/team/` |
 | Etkinlikler | `src/content/events.ts` |
 | Sıkça sorulan sorular | `src/content/faq.ts` |
 | Form alanları ve ilgi alanları | `src/lib/schema.ts` |
@@ -72,6 +72,26 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 ### Önizleme modu
 
 `src/content/site.ts` içindeki `preview: true` iken sitede "Önizleme" şeridi görünür ve site arama motorlarına kapalıdır. Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirildikten sonra `false` yapın.
+
+## Ekip klipleri (GIF gibi dönen videolar)
+
+Ekip kartlarında her üye için kısa, sessiz, döngülü bir klip gösterilebilir. Gerçek GIF yerine MP4 kullanılır: aynı görüntü yaklaşık 10 kat daha küçük dosyayla gelir ve telefonda da kendiliğinden oynar. Klipler yalnızca ekranda görünürken oynar, her kartta durdur/oynat düğmesi vardır.
+
+1. Üye için 3 ila 8 saniyelik dikey bir video hazırlayın (ör. CapCut şablonuyla).
+2. Videoyu küçültüp sesini kaldırın ve bir kapak karesi alın:
+
+   ```bash
+   ffmpeg -i kaynak.mov -an -vf "fps=24,scale=432:-2" -c:v libx264 -crf 31 -pix_fmt yuv420p -movflags +faststart public/team/ayse.mp4
+   ffmpeg -ss 1 -i kaynak.mov -frames:v 1 -vf "scale=432:-2" public/team/ayse.jpg
+   ```
+
+3. `src/content/team.ts` içinde üyeye `clip: "ayse.mp4", photo: "ayse.jpg"` ekleyin.
+
+Klip yoksa yalnızca `photo` verilebilir; o da yoksa kartta baş harfler görünür. `public/team/ornek.mp4` kulübün gönderdiği şablon videodur ve yalnızca görünümü göstermek için duruyor.
+
+## Sosyal medya hesapları
+
+Hesaplar `src/content/site.ts` içindeki `socials` ve `socialAccounts` alanlarından yönetilir (kaynak: linktr.ee/nexuskbu). Alt bilgi, iletişim sayfası, mobil menü ve ana sayfadaki "Bizi takipte kal" kutuları bu listeden üretilir.
 
 ## Başvuruların toplanması
 

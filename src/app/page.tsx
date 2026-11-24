@@ -11,6 +11,7 @@ import { Steps } from "@/components/Steps";
 import { TeamCard } from "@/components/TeamCard";
 import { FAQ } from "@/components/FAQ";
 import { CTA } from "@/components/CTA";
+import { SocialTiles } from "@/components/SocialTiles";
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/Button";
 import { Mark, SectionLabel } from "@/components/Shapes";
@@ -18,7 +19,8 @@ import { splitEvents } from "@/content/events";
 import { team } from "@/content/team";
 import { getToday } from "@/lib/today";
 
-const tape = ["Tanış", "Birlikte üret", "Sertifikanı al", "Bölümünün dışına çık", "Kampüse karış", "Bağ kur"];
+// Kulübün kendi tanıtım cümlelerinden (linktr.ee/nexuskbu)
+const tape = ["Projeler", "Eğitimler", "Etkinlikler", "Kişisel ve mesleki gelişim", "Disiplinler arası etkileşim"];
 
 function TextLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -129,7 +131,7 @@ export default async function HomePage() {
             </div>
             <TextLink href="/ekip">Tüm ekip</TextLink>
           </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
             {leadership.map((m, i) => (
               <Reveal key={i} delay={i * 90}>
                 <TeamCard member={m} index={i} />
@@ -157,6 +159,19 @@ export default async function HomePage() {
               <FAQ />
             </Reveal>
           </div>
+        </Container>
+      </section>
+
+      {/* 07 Sosyal medya */}
+      <section className="pb-24 sm:pb-32">
+        <Container>
+          <Reveal className="mb-12">
+            <SectionLabel index="07">Sosyal medya</SectionLabel>
+            <h2 className="display-tight mt-6 text-5xl sm:text-6xl lg:text-7xl">
+              Bizi <Mark className="bg-coral">takipte</Mark> kal.
+            </h2>
+          </Reveal>
+          <SocialTiles />
         </Container>
       </section>
 

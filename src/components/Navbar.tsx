@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { navLinks, site } from "@/content/site";
+import { navLinks, socialAccounts } from "@/content/site";
+import { socialIcons } from "./icons";
 import { Logo } from "./Logo";
 import { Container } from "./Container";
 import { cn } from "@/lib/utils";
@@ -103,9 +104,16 @@ export function Navbar() {
           ))}
         </ul>
         <div className="flex items-center justify-between border-t-2 border-paper/30 pt-5">
-          <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer" className="label-mono normal-case">
-            {site.instagramHandle}
-          </a>
+          <div className="flex gap-2">
+            {socialAccounts.map((a) => {
+              const Icon = socialIcons[a.key];
+              return (
+                <a key={a.key} href={a.href} target="_blank" rel="noopener noreferrer" aria-label={a.name} className="grid h-11 w-11 place-items-center rounded-full border-2 border-paper/60 transition-colors hover:bg-paper hover:text-navy">
+                  <Icon className="h-5 w-5" />
+                </a>
+              );
+            })}
+          </div>
           <Link href="/basvuru" onClick={close} className="rounded-full border-2 border-paper bg-brand px-5 py-2.5 font-display font-bold text-paper">
             Üye ol
           </Link>

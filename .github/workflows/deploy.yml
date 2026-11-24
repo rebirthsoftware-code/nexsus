@@ -38,7 +38,7 @@ jobs:
       - name: Siteyi derle
         run: npm run build
         env:
-          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
           # Depo ayarlarında (Settings → Secrets and variables → Actions → Variables) tanımlanır
           NEXT_PUBLIC_APPLICATION_ENDPOINT: ${{ vars.APPLICATION_ENDPOINT }}

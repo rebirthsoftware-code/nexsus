@@ -8,7 +8,7 @@ export const site = {
   university: "Karabük Üniversitesi",
   tagline: "Kampüsün bağlantı noktası",
   description:
-    "Nexus, Karabük Üniversitesi'nde tüm bölümlerden öğrencileri bir araya getiren; sosyalleşme, kariyer ve sertifikalı eğitim fırsatları sunan öğrenci kulübüdür.",
+    "Nexus, Karabük Üniversitesi'nde tüm bölümlerden öğrencileri bir araya getiren öğrenci kulübü. Projeler, eğitimler ve etkinliklerle kişisel ve mesleki gelişim, disiplinler arası etkileşim.",
   /** Sitenin yayın adresi. GitHub Pages yayınında otomatik verilir; özel alan adı alınırsa burayı güncelleyin. */
   url: (process.env.NEXT_PUBLIC_SITE_URL || "https://rebirthsoftware-code.github.io/nexsus").replace(/\/$/, ""),
   /**
@@ -20,11 +20,14 @@ export const site = {
   foundedYear: 2024, // TODO
   location: "Karabük Üniversitesi, Demir Çelik Kampüsü",
   instagramHandle: "@nexuskarabukuni",
+  /** Kulübün resmi hesapları (kaynak: linktr.ee/nexuskbu). Boş bırakılan hesap sitede gösterilmez. */
   socials: {
-    instagram: "https://www.instagram.com/nexuskarabukuni",
-    linkedin: "", // TODO: varsa ekleyin
-    whatsapp: "", // TODO: topluluk daveti linki (isteğe bağlı)
-    youtube: "",
+    instagram: "https://instagram.com/nexuskarabukuni",
+    tiktok: "https://tiktok.com/@nexuskarabukuni",
+    youtube: "https://www.youtube.com/@NEXUS.TURKIYE",
+    linktree: "https://linktr.ee/nexuskbu",
+    linkedin: "",
+    whatsapp: "",
   },
   // TODO: gerçek sayılarla güncelleyin
   stats: [
@@ -57,3 +60,10 @@ export const departments = [
   "Eğitim",
   "Hemşirelik",
 ] as const;
+
+/** Sosyal medya hesapları: alt bilgi, iletişim sayfası ve ana sayfadaki kutular bu listeden üretilir. */
+export const socialAccounts = [
+  { key: "instagram", name: "Instagram", handle: "@nexuskarabukuni", href: site.socials.instagram, note: "Duyurular ve en hızlı cevap" },
+  { key: "tiktok", name: "TikTok", handle: "@nexuskarabukuni", href: site.socials.tiktok, note: "Kısa videolar" },
+  { key: "youtube", name: "YouTube", handle: "@NEXUS.TURKIYE", href: site.socials.youtube, note: "Videolar ve yayınlar" },
+].filter((a) => a.href) as Array<{ key: "instagram" | "tiktok" | "youtube"; name: string; handle: string; href: string; note: string }>;

@@ -21,6 +21,14 @@ export function daysBetween(a: string, b: string) {
   return Math.round((toUtc(b) - toUtc(a)) / 86_400_000);
 }
 
+/**
+ * public/ klasöründeki bir dosyanın adresi. Site bir alt yolda yayınlandığında
+ * (GitHub Pages: /nexsus) düz <img>/<video> yollarına bu alt yol elle eklenmelidir.
+ */
+export function asset(path: string) {
+  return `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export function initials(name: string) {
   return name
     .trim()

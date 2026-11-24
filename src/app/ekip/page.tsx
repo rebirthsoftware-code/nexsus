@@ -33,7 +33,7 @@ export default function TeamPage() {
               <h2 className="display-tight text-4xl sm:text-5xl">{group.title}</h2>
               <p className="label-mono text-ink-soft">{group.note}</p>
             </Reveal>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
               {group.members.map((m, i) => {
                 const index = counter++;
                 return (

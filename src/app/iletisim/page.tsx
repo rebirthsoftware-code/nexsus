@@ -4,20 +4,21 @@ import { PageHeader } from "@/components/PageHeader";
 import { Container } from "@/components/Container";
 import { Reveal } from "@/components/Reveal";
 import { Mark } from "@/components/Shapes";
-import { site } from "@/content/site";
+import { site, socialAccounts } from "@/content/site";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "İletişim",
-  description: "Nexus ile iletişime geçin: Instagram ve kampüs adresi.",
+  description: "Nexus ile iletişime geçin: Instagram, TikTok, YouTube ve kampüs adresi.",
 };
 
 export default function ContactPage() {
+  const hovers = { instagram: "hover:bg-coral", tiktok: "hover:bg-lilac", youtube: "hover:bg-sun" } as const;
   const channels = [
-    { title: "Instagram", value: site.instagramHandle, href: site.socials.instagram, note: "Duyurular ve en hızlı cevap", hover: "hover:bg-coral" },
+    ...socialAccounts.map((a) => ({ title: a.name, value: a.handle, href: a.href, note: a.note, hover: hovers[a.key] })),
     site.email && { title: "E-posta", value: site.email, href: `mailto:${site.email}`, note: "İş birliği, sponsorluk, resmi yazışma", hover: "hover:bg-lime" },
-    site.socials.linkedin && { title: "LinkedIn", value: "Nexus KBÜ", href: site.socials.linkedin, note: "Mezun ağı ve kurumsal iletişim", hover: "hover:bg-lilac" },
-    site.socials.whatsapp && { title: "WhatsApp", value: "Topluluğa katıl", href: site.socials.whatsapp, note: "Üyelerin anlık duyuru kanalı", hover: "hover:bg-sun" },
+    site.socials.linkedin && { title: "LinkedIn", value: "Nexus KBÜ", href: site.socials.linkedin, note: "Mezun ağı ve kurumsal iletişim", hover: "hover:bg-lime" },
+    site.socials.whatsapp && { title: "WhatsApp", value: "Topluluğa katıl", href: site.socials.whatsapp, note: "Üyelerin anlık duyuru kanalı", hover: "hover:bg-lime" },
   ].filter(Boolean) as Array<{ title: string; value: string; href: string; note: string; hover: string }>;
 
   return (
