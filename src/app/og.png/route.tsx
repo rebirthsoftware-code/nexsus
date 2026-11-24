@@ -3,12 +3,13 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { site } from "@/content/site";
 
-export const alt = `${site.name} | ${site.tagline}`;
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+// Statik dışa aktarımda görsel derleme anında üretilir ve /og.png olarak yayınlanır
+export const dynamic = "force-static";
+
+const size = { width: 1200, height: 630 };
 
 /** Sosyal medyada link paylaşıldığında görünen kapak görseli. */
-export default async function OpengraphImage() {
+export async function GET() {
   const [font, logo] = await Promise.all([
     readFile(join(process.cwd(), "src/assets/BricolageGrotesque-ExtraBold.ttf")),
     readFile(join(process.cwd(), "public/brand/nexus-logo.png")),
@@ -19,6 +20,7 @@ export default async function OpengraphImage() {
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: "#f5f2ea", color: ink, fontFamily: "Bricolage", padding: 64, borderBottom: "28px solid #015efb" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse yalnızca düz <img> destekler */}
         <img src={logoSrc} alt="" width={760} height={231} />
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", fontSize: 84, lineHeight: 1.05, letterSpacing: -4, maxWidth: 820 }}>

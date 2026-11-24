@@ -7,7 +7,7 @@ Karabük Üniversitesi **Nexus** öğrenci kulübünün tanıtım sitesi. Nexus 
 "Kampüs afişi": krem kağıt zemin, mürekkep siyahı kalın çizgiler, sert gölgeler ve her biri bir bölümü temsil eden canlı renkler. Öne çıkan parçalar:
 
 - **Bağlantı haritası** (ana sayfa): Canvas ile çizilen etkileşimli ağ. Her etiket bir bölüm, ortadaki düğüm Nexus logosunun X işareti. İmleç "Sen" düğümüdür; yaklaştığı bölümlerle bağ kurar ve sayaç güncellenir.
-- **Bilet görünümlü etkinlik kartları**: tarih koçanı, kategori rengi ve "X gün kaldı" sayacı. Tarihi geçen etkinlik kendiliğinden "geçmiş"e düşer.
+- **Bilet görünümlü etkinlik kartları**: tarih koçanı, kategori rengi ve "X gün kaldı" sayacı. Site her gece yeniden derlendiği için tarihi geçen etkinlik kendiliğinden "geçmiş"e düşer.
 - **Yaka kartı görünümlü ekip kartları**.
 - **Canlı üye kartı** (başvuru sayfası): form doldurulurken kart anında güncellenir, gönderince üzerine "Başvuru alındı" damgası basılır.
 
@@ -27,9 +27,9 @@ Logodaki X işareti ayrıca SVG olarak çizilmiştir (`LogoMark`); favicon'da, b
 
 ## Teknolojiler
 
-- **Next.js 16** (App Router, Cache Components) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router, statik dışa aktarım) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** ile özel tasarım sistemi
-- **react-hook-form + zod**: istemci ve sunucuda aynı şemayla doğrulanan başvuru formu
+- **react-hook-form + zod** ile doğrulanan başvuru formu
 - Canvas 2D ile yazılmış, kütüphanesiz etkileşimli animasyon
 - `next/font` (Bricolage Grotesque, DM Sans, Instrument Serif, JetBrains Mono)
 - SEO: `metadata`, otomatik üretilen Open Graph kapak görseli, `sitemap.xml`, `robots.txt`
@@ -40,7 +40,8 @@ Logodaki X işareti ayrıca SVG olarak çizilmiştir (`LogoMark`); favicon'da, b
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build && npm start
+npm run build      # statik site → out/
+npx serve out      # derlenmiş siteyi yerelde aç
 npm run lint
 ```
 
@@ -56,21 +57,54 @@ npm run lint
 | Sıkça sorulan sorular | `src/content/faq.ts` |
 | Form alanları ve ilgi alanları | `src/lib/schema.ts` |
 
+## Yayın (GitHub Pages)
+
+Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve GitHub Pages'te yayınlanır. `.github/workflows/deploy.yml` şunları yapar:
+
+- Yayın dalına her push'ta siteyi derleyip yayınlar.
+- Her gece siteyi yeniden derler; böylece etkinliklerdeki gün sayaçları güncel kalır.
+- Depo ayarlarından elle de çalıştırılabilir (Actions → "Siteyi yayınla" → Run workflow).
+
+İlk kurulumda depoda **Settings → Pages → Source: GitHub Actions** seçili olmalıdır.
+
+Özel alan adı kullanılacaksa Settings → Pages bölümünden eklenir; alt yol (`/nexsus`) kendiliğinden kalkar.
+
+### Önizleme modu
+
+`src/content/site.ts` içindeki `preview: true` iken sitede "Önizleme" şeridi görünür ve site arama motorlarına kapalıdır. Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirildikten sonra `false` yapın.
+
 ## Başvuruların toplanması
 
-Form `POST /api/basvuru` ucuna gider. `.env.local` dosyasında `APPLICATION_WEBHOOK_URL` tanımlıysa başvuru JSON olarak oraya iletilir; tanımlı değilse yalnızca sunucu günlüğüne yazılır.
+Site statik olduğu için başvurular tarayıcıdan doğrudan bir kayıt adresine gönderilir.
 
-En kolay yol **Google Sheets**: bir Google Apps Script web uygulaması oluşturup `doPost` içinde gelen JSON'u tabloya ekleyin, yayınlanan adresi `APPLICATION_WEBHOOK_URL` olarak girin. Discord webhook'u veya Make/Zapier da kullanılabilir.
+- **Kayıt adresi tanımlı değilse** (şu anki durum): form başvuru metnini hazırlar, panoya kopyalar ve kullanıcıyı kulübün Instagram mesajlarına yönlendirir.
+- **Kayıt adresi tanımlıysa**: başvuru JSON olarak o adrese gönderilir ve kullanıcı "Başvuru alındı" ekranını görür.
 
-## Yayına alma
+Google Sheets'e kaydetmek için:
 
-Vercel'e GitHub deposunu bağlamak yeterli. Yayına aldıktan sonra `src/content/site.ts` içindeki `url` alanını gerçek adresle güncelleyin.
+1. Bir Google Tablosu açın, **Uzantılar → Apps Script** ile şu kodu ekleyin:
+
+   ```js
+   function doPost(e) {
+     const d = JSON.parse(e.postData.contents);
+     SpreadsheetApp.getActiveSheet().appendRow([
+       new Date(), d.fullName, d.email, d.phone, d.department, d.classYear,
+       d.studentNo, (d.interests || []).join(", "), d.motivation,
+     ]);
+     return ContentService.createTextOutput("ok");
+   }
+   ```
+
+2. **Dağıt → Yeni dağıtım → Web uygulaması**, erişim: "Herkes". Verilen adresi kopyalayın.
+3. GitHub deposunda **Settings → Secrets and variables → Actions → Variables** altında `APPLICATION_ENDPOINT` adıyla bu adresi ekleyin ve yayın iş akışını yeniden çalıştırın.
+
+Yerelde denemek için aynı adresi `.env.local` dosyasına `NEXT_PUBLIC_APPLICATION_ENDPOINT` olarak yazın.
 
 ## Yapı
 
 ```
 src/
-  app/            sayfalar (/, /hakkimizda, /etkinlikler, /ekip, /basvuru, /iletisim), API ucu, kapak görseli
+  app/            sayfalar (/, /hakkimizda, /etkinlikler, /ekip, /basvuru, /iletisim) ve kapak görseli
   components/     bileşenler (ConnectionMap, EventTicket, TeamCard, MemberCard, ApplicationForm ...)
   content/        tüm metin ve veri içeriği
   lib/            zod şeması, tarih ve renk yardımcıları

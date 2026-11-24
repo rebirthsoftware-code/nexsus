@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "İletişim",
-  description: "Nexus ile iletişime geçin: Instagram, e-posta ve kampüs adresi.",
+  description: "Nexus ile iletişime geçin: Instagram ve kampüs adresi.",
 };
 
 export default function ContactPage() {
   const channels = [
     { title: "Instagram", value: site.instagramHandle, href: site.socials.instagram, note: "Duyurular ve en hızlı cevap", hover: "hover:bg-coral" },
-    { title: "E-posta", value: site.email, href: `mailto:${site.email}`, note: "İş birliği, sponsorluk, resmi yazışma", hover: "hover:bg-lime" },
+    site.email && { title: "E-posta", value: site.email, href: `mailto:${site.email}`, note: "İş birliği, sponsorluk, resmi yazışma", hover: "hover:bg-lime" },
     site.socials.linkedin && { title: "LinkedIn", value: "Nexus KBÜ", href: site.socials.linkedin, note: "Mezun ağı ve kurumsal iletişim", hover: "hover:bg-lilac" },
     site.socials.whatsapp && { title: "WhatsApp", value: "Topluluğa katıl", href: site.socials.whatsapp, note: "Üyelerin anlık duyuru kanalı", hover: "hover:bg-sun" },
   ].filter(Boolean) as Array<{ title: string; value: string; href: string; note: string; hover: string }>;

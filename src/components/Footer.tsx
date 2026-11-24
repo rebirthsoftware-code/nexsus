@@ -1,4 +1,5 @@
 import Image from "next/image";
+import wordmarkLight from "../../public/brand/nexus-wordmark-light.png";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin } from "lucide-react";
 import { site, navLinks } from "@/content/site";
@@ -62,11 +63,19 @@ export function Footer() {
               <h3 className="label-mono text-paper/60">İletişim</h3>
               <ul className="mt-4 space-y-3 text-sm text-paper/80">
                 <li className="flex items-start gap-2.5">
-                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
-                  <a href={`mailto:${site.email}`} className="break-all hover:text-paper">
-                    {site.email}
+                  <InstagramIcon className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
+                  <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-paper">
+                    {site.instagramHandle}
                   </a>
                 </li>
+                {site.email && (
+                  <li className="flex items-start gap-2.5">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
+                    <a href={`mailto:${site.email}`} className="break-all hover:text-paper">
+                      {site.email}
+                    </a>
+                  </li>
+                )}
                 <li className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
                   <span>{site.location}</span>
@@ -79,7 +88,7 @@ export function Footer() {
 
       {/* Dev logo: zemine gömülü filigran */}
       <div className="pointer-events-none select-none px-5 pb-6 pt-4 sm:px-8" aria-hidden="true">
-        <Image src="/brand/nexus-wordmark-light.png" alt="" width={1600} height={387} sizes="100vw" className="mx-auto w-full max-w-[76rem] opacity-[0.09]" />
+        <Image src={wordmarkLight} alt="" sizes="100vw" className="mx-auto w-full max-w-[76rem] opacity-[0.09]" />
       </div>
 
       <div className="relative border-t-2 border-paper/15 bg-navy">

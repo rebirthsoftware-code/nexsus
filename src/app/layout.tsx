@@ -24,9 +24,11 @@ export const metadata: Metadata = {
     siteName: site.fullName,
     title: `${site.name} | ${site.tagline}`,
     description: site.description,
+    images: [{ url: `${site.url}/og.png`, width: 1200, height: 630, alt: `${site.name} | ${site.tagline}` }],
   },
-  twitter: { card: "summary_large_image", title: site.fullName, description: site.description },
-  robots: { index: true, follow: true },
+  twitter: { card: "summary_large_image", title: site.fullName, description: site.description, images: [`${site.url}/og.png`] },
+  // Önizleme sürümü arama motorlarına kapalıdır (bkz. src/content/site.ts → preview)
+  robots: site.preview ? { index: false, follow: false } : { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
@@ -51,6 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Footer />
+        {site.preview && (
+          <p className="label-mono pointer-events-none fixed bottom-3 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border-2 border-ink bg-sun px-3 py-1.5 text-center shadow-hard-sm max-sm:text-[0.6rem] max-sm:tracking-[0.04em]">
+            Önizleme · ekip, etkinlik ve sayılar örnektir
+          </p>
+        )}
       </body>
     </html>
   );

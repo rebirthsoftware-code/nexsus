@@ -45,6 +45,33 @@ function Legend({ n, children }: { n: string; children: React.ReactNode }) {
   );
 }
 
+/**
+ * Başvuruların kaydedileceği adres (ör. Google Sheets'e yazan bir Apps Script web uygulaması).
+ * Tanımlı değilse form, başvuru metnini hazırlayıp Instagram mesajı olarak göndermeye yönlendirir.
+ */
+const ENDPOINT = process.env.NEXT_PUBLIC_APPLICATION_ENDPOINT;
+
+type Submitted = Pick<ApplicationInput, "fullName" | "department" | "classYear" | "interests"> & {
+  /** sent: uç noktaya kaydedildi · manual: metin hazırlandı, kullanıcı Instagram'dan gönderecek */
+  mode: "sent" | "manual";
+  summary: string;
+};
+
+function summarize(d: Omit<ApplicationInput, "website" | "consent">) {
+  return [
+    "Nexus üyelik başvurusu",
+    `Ad soyad: ${d.fullName}`,
+    `Bölüm: ${d.department} (${d.classYear})`,
+    d.studentNo ? `Öğrenci no: ${d.studentNo}` : null,
+    `E-posta: ${d.email}`,
+    `Telefon: ${d.phone}`,
+    `İlgi alanları: ${d.interests.join(", ")}`,
+    `Neden Nexus: ${d.motivation}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 const perks = [
   { Icon: Clock3, text: "İki dakika sürer" },
   { Icon: Users2, text: "Bölüm ya da sınıf şartı yok" },
@@ -54,7 +81,8 @@ const perks = [
 export function ApplicationForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [serverMessage, setServerMessage] = useState("");
-  const [submitted, setSubmitted] = useState<Pick<ApplicationInput, "fullName" | "department" | "classYear" | "interests"> | null>(null);
+  const [submitted, setSubmitted] = useState<Submitted | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const {
     register,
@@ -78,44 +106,94 @@ export function ApplicationForm() {
     if (status === "success") successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [status]);
 
+  const copySummary = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+    } catch {
+      setCopied(false); // pano izni yoksa metin ekranda gösterilir, elle kopyalanabilir
+    }
+  };
+
   const onSubmit = async (data: ApplicationInput) => {
     setStatus("sending");
     setServerMessage("");
+    const { website, consent, ...application } = data;
+    void consent;
+    const card = { fullName: data.fullName, department: data.department, classYear: data.classYear, interests: data.interests };
+
+    // Bot koruması: gizli alan doluysa hiçbir şey göndermeden "başarılı" görün
+    if (website) {
+      setSubmitted({ ...card, mode: "sent", summary: "" });
+      setStatus("success");
+      return;
+    }
+
+    // Kayıt adresi tanımlı değilse başvuru metni hazırlanır ve Instagram mesajı olarak gönderilir
+    if (!ENDPOINT) {
+      const summary = summarize(application);
+      await copySummary(summary);
+      setSubmitted({ ...card, mode: "manual", summary });
+      setStatus("success");
+      return;
+    }
+
     try {
-      const res = await fetch("/api/basvuru", {
+      // "text/plain" gövde, Google Apps Script gibi basit uç noktaların ön kontrol (preflight) istemeden kabul etmesini sağlar
+      const res = await fetch(ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ ...application, submittedAt: new Date().toISOString(), source: "nexus-web" }),
       });
-      const json = (await res.json()) as { ok: boolean; message?: string };
-      if (!res.ok || !json.ok) throw new Error(json.message || "Başvuru gönderilemedi");
-      setSubmitted({ fullName: data.fullName, department: data.department, classYear: data.classYear, interests: data.interests });
+      if (!res.ok) throw new Error("Başvuru şu an kaydedilemedi, lütfen biraz sonra tekrar dene.");
+      setSubmitted({ ...card, mode: "sent", summary: "" });
       setStatus("success");
       reset();
     } catch (e) {
       setStatus("error");
-      setServerMessage(e instanceof Error ? e.message : "Bir şeyler ters gitti");
+      setServerMessage(e instanceof Error && e.message ? e.message : "Bir şeyler ters gitti");
     }
   };
 
   if (status === "success" && submitted) {
+    const firstName = submitted.fullName.trim().split(/\s+/)[0];
+    const manual = submitted.mode === "manual";
     return (
       <div ref={successRef} className="grid items-center gap-12 rounded-[2rem] border-2 border-ink bg-brand p-8 text-paper shadow-hard-lg sm:p-14 lg:grid-cols-[19rem_1fr] lg:gap-16">
-        <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.interests} stamped />
+        <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.interests} stamped={!manual} />
         <div role="status">
-          <p className="label-mono">Başvuru alındı</p>
-          <h2 className="display-tight mt-4 text-5xl sm:text-6xl">Hoş geldin, {submitted.fullName.trim().split(/\s+/)[0]}!</h2>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/90">
-            Başvurun bize ulaştı. Ekipten biri en kısa sürede sana yazacak. O zamana kadar duyuruları kaçırmamak için Instagram&apos;da buluşalım.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button href={site.socials.instagram} variant="ink" external>
-              {site.instagramHandle}
-            </Button>
-            <Button href="/etkinlikler" variant="paper">
-              Etkinliklere göz at
-            </Button>
-          </div>
+          <p className="label-mono">{manual ? "Son bir adım" : "Başvuru alındı"}</p>
+          <h2 className="display-tight mt-4 text-5xl sm:text-6xl">{manual ? `Başvurun hazır, ${firstName}!` : `Hoş geldin, ${firstName}!`}</h2>
+          {manual ? (
+            <>
+              <p className="mt-5 max-w-lg text-lg leading-relaxed text-paper/90">
+                {copied ? "Başvuru metnin panoya kopyalandı." : "Aşağıdaki başvuru metnini kopyala."} Instagram&apos;da bize mesaj olarak yapıştırıp gönder; ekipten biri sana dönecek.
+              </p>
+              <textarea readOnly value={submitted.summary} rows={6} className="mt-5 w-full max-w-lg resize-none rounded-xl border-2 border-ink bg-paper p-4 font-mono text-xs leading-relaxed text-ink" aria-label="Başvuru metni" onFocus={(e) => e.currentTarget.select()} />
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button href={`https://ig.me/m/${site.instagramHandle.replace("@", "")}`} variant="lime" external>
+                  Instagram&apos;da mesaj at <Send className="h-4 w-4" />
+                </Button>
+                <Button type="button" variant="paper" onClick={() => copySummary(submitted.summary)}>
+                  {copied ? "Kopyalandı ✓" : "Metni kopyala"}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/90">
+                Başvurun bize ulaştı. Ekipten biri en kısa sürede sana yazacak. O zamana kadar duyuruları kaçırmamak için Instagram&apos;da buluşalım.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button href={site.socials.instagram} variant="ink" external>
+                  {site.instagramHandle}
+                </Button>
+                <Button href="/etkinlikler" variant="paper">
+                  Etkinliklere göz at
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -225,8 +303,9 @@ export function ApplicationForm() {
 
         <Button type="submit" disabled={status === "sending"} className="w-full px-8 py-4 text-base sm:w-auto">
           {status === "sending" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          {status === "sending" ? "Gönderiliyor..." : "Başvuruyu gönder"}
+          {status === "sending" ? "Gönderiliyor..." : ENDPOINT ? "Başvuruyu gönder" : "Başvurumu hazırla"}
         </Button>
+        {!ENDPOINT && <p className="text-sm text-ink-soft">Başvurun bir metin olarak hazırlanır; son adımda Instagram mesajıyla bize gönderirsin.</p>}
       </form>
     </div>
   );

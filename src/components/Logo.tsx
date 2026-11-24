@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
+import wordmark from "../../public/brand/nexus-wordmark.png";
+import wordmarkLight from "../../public/brand/nexus-wordmark-light.png";
+import full from "../../public/brand/nexus-logo.png";
+import fullLight from "../../public/brand/nexus-logo-light.png";
 
 /**
  * Logodaki "X": mavi ok ile lacivert kol. Ölçüler özgün logodan alınmıştır.
@@ -24,8 +28,8 @@ export function LogoMark({ className, light = false }: { className?: string; lig
 }
 
 const files = {
-  wordmark: { dark: "/brand/nexus-wordmark.png", light: "/brand/nexus-wordmark-light.png", ratio: 1000 / 242 },
-  full: { dark: "/brand/nexus-logo.png", light: "/brand/nexus-logo-light.png", ratio: 1200 / 365 },
+  wordmark: { dark: wordmark, light: wordmarkLight },
+  full: { dark: full, light: fullLight },
 } as const;
 
 /**
@@ -53,8 +57,6 @@ export function Logo({
     <Image
       src={light ? file.light : file.dark}
       alt={asLink ? `${site.name} ana sayfa` : `${site.fullName} logosu`}
-      width={Math.round(120 * file.ratio)}
-      height={120}
       priority={priority}
       sizes="(min-width: 640px) 320px, 200px"
       className={cn("h-7 w-auto", className)}

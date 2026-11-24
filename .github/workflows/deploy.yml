@@ -1,0 +1,58 @@
+name: Siteyi yayınla (GitHub Pages)
+
+on:
+  push:
+    branches: [main, ccr-f18c3fda-25ol9s]
+  # Her gece yeniden derle: etkinliklerdeki "X gün kaldı" sayaçları güncel kalsın,
+  # tarihi geçen etkinlikler kendiliğinden "geçmiş"e düşsün. (21:17 UTC = 00:17 Türkiye)
+  schedule:
+    - cron: "17 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Derle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Pages ayarlarını al
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - run: npm ci
+      - run: npm run lint
+      - name: Siteyi derle
+        run: npm run build
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          # Depo ayarlarında (Settings → Secrets and variables → Actions → Variables) tanımlanır
+          NEXT_PUBLIC_APPLICATION_ENDPOINT: ${{ vars.APPLICATION_ENDPOINT }}
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: out
+
+  deploy:
+    name: Yayınla
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -9,8 +9,14 @@ export const site = {
   tagline: "Kampüsün bağlantı noktası",
   description:
     "Nexus, Karabük Üniversitesi'nde tüm bölümlerden öğrencileri bir araya getiren; sosyalleşme, kariyer ve sertifikalı eğitim fırsatları sunan öğrenci kulübüdür.",
-  url: "https://nexuskarabuk.vercel.app", // Yayına aldıktan sonra gerçek alan adıyla değiştirin
-  email: "nexuskarabukuni@gmail.com", // TODO: gerçek e-posta
+  /** Sitenin yayın adresi. GitHub Pages yayınında otomatik verilir; özel alan adı alınırsa burayı güncelleyin. */
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://rebirthsoftware-code.github.io/nexsus").replace(/\/$/, ""),
+  /**
+   * true iken sitede "önizleme" şeridi görünür ve arama motorlarına kapalıdır.
+   * Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirilince false yapın.
+   */
+  preview: true,
+  email: "", // TODO: kulübün gerçek e-posta adresi (boşken sitede gösterilmez)
   foundedYear: 2024, // TODO
   location: "Karabük Üniversitesi, Demir Çelik Kampüsü",
   instagramHandle: "@nexuskarabukuni",
@@ -27,7 +33,7 @@ export const site = {
     { value: 12, suffix: "", label: "etkinlik" },
     { value: 3, suffix: "", label: "sertifika programı" },
   ],
-} as const;
+};
 
 export const navLinks = [
   { href: "/hakkimizda", label: "Hakkımızda" },

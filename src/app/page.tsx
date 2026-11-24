@@ -148,7 +148,7 @@ export default async function HomePage() {
               <h2 className="display-tight mt-6 text-5xl sm:text-6xl">
                 Aklına <Mark className="bg-sun">takılan</Mark> mı var?
               </h2>
-              <p className="mt-6 max-w-sm text-lg leading-relaxed text-ink-soft">Cevabını burada bulamadıysan bize Instagram&apos;dan ya da e-postayla yaz.</p>
+              <p className="mt-6 max-w-sm text-lg leading-relaxed text-ink-soft">Cevabını burada bulamadıysan bize Instagram&apos;dan yaz.</p>
               <div className="mt-6">
                 <TextLink href="/iletisim">İletişime geç</TextLink>
               </div>
