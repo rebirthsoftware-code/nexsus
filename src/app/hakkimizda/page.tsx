@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 const values = [
-  { title: "Bağlantı", text: "Bölüm, sınıf ve ilgi alanı fark etmeksizin insanları birbirine bağlarız.", cls: "bg-cobalt text-paper" },
+  { title: "Bağlantı", text: "Bölüm, sınıf ve ilgi alanı fark etmeksizin insanları birbirine bağlarız.", cls: "bg-brand text-paper" },
   { title: "Kapsayıcılık", text: "Herkesin kendini ait hissettiği, önyargısız bir topluluk kurarız.", cls: "bg-coral" },
   { title: "Gelişim", text: "Sertifikalı eğitimler ve atölyelerle üyelerin kariyerine somut katkı sağlarız.", cls: "bg-lime" },
   { title: "Şeffaflık", text: "Kararları üyelerle birlikte alır, açık iletişimi esas alırız.", cls: "bg-lilac" },
@@ -62,7 +62,7 @@ export default function AboutPage() {
           <SectionLabel>Neden varız</SectionLabel>
           <p className="mt-8 font-display text-3xl font-bold leading-[1.15] tracking-[-0.03em] sm:text-4xl lg:text-5xl">
             Üniversitede çoğu kulüp tek bir bölümün etrafında döner. Biz tersini istedik: mühendislik öğrencisinin{" "}
-            <span className="font-serif font-normal italic text-cobalt">psikoloji</span> öğrencisiyle, hukukçunun{" "}
+            <span className="font-serif font-normal italic text-brand">psikoloji</span> öğrencisiyle, hukukçunun{" "}
             <span className="font-serif font-normal italic text-coral">tasarımcıyla</span> tanışabildiği bir yer.
           </p>
         </Reveal>
@@ -82,7 +82,7 @@ export default function AboutPage() {
       </Container>
 
       <div className="mt-24 overflow-x-clip">
-        <Marquee items={departments} className="rotate-1 scale-[1.03] bg-cobalt font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
+        <Marquee items={departments} chevronClassName="text-navy" className="rotate-1 scale-[1.03] bg-brand font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
       </div>
 
       {/* Değerler */}

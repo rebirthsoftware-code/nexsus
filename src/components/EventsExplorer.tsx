@@ -28,7 +28,7 @@ export function EventsExplorer({ today }: { today: string }) {
             aria-pressed={filter === c}
             className={cn(
               "rounded-full border-2 border-ink px-4 py-2 font-display text-sm font-bold tracking-tight transition-all",
-              filter === c ? "bg-ink text-paper shadow-none" : "bg-paper shadow-hard-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-lime"
+              filter === c ? "bg-ink text-paper shadow-none" : "bg-paper shadow-hard-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-brand hover:text-paper"
             )}
           >
             {c}
@@ -39,7 +39,7 @@ export function EventsExplorer({ today }: { today: string }) {
       <section className="mt-12" aria-live="polite">
         <h2 className="flex items-center gap-3 font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
           Yaklaşan
-          <span className="label-mono rounded-full border-2 border-ink bg-lime px-2.5 py-1">{upcoming.length}</span>
+          <span className="label-mono rounded-full border-2 border-ink bg-brand px-2.5 py-1 text-paper">{upcoming.length}</span>
         </h2>
         {upcoming.length ? (
           <div className="mt-7 grid gap-6 lg:grid-cols-2">

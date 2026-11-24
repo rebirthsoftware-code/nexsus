@@ -29,11 +29,11 @@ export function MemberCard({
       <div className="mx-auto h-14 w-7 border-x-2 border-ink bg-coral" />
       <div className="relative z-10 mx-auto -mb-3 h-6 w-12 rounded-md border-2 border-ink bg-paper-deep" />
 
-      <div className="relative -rotate-2 overflow-hidden rounded-[1.75rem] border-2 border-ink bg-paper shadow-hard-lg">
-        <div className="relative border-b-2 border-ink bg-cobalt px-5 pb-14 pt-8 text-paper">
-          <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#f3eee3_1.2px,transparent_1.2px)] [background-size:14px_14px]" />
+      <div className="relative -rotate-2 overflow-hidden rounded-[1.75rem] border-2 border-ink bg-paper text-ink shadow-hard-lg">
+        <div className="relative border-b-2 border-ink bg-navy px-5 pb-14 pt-8 text-paper">
+          <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#f5f2ea_1.2px,transparent_1.2px)] [background-size:14px_14px]" />
           <div className="relative flex items-center justify-between">
-            <Logo invert asLink={false} />
+            <Logo light asLink={false} className="h-5" />
             <span className="label-mono">Üye kartı</span>
           </div>
         </div>

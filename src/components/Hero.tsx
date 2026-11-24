@@ -10,7 +10,7 @@ const faces = [
   { code: "TP", cls: "bg-coral" },
   { code: "HK", cls: "bg-lilac" },
   { code: "PS", cls: "bg-lime" },
-  { code: "İŞ", cls: "bg-cobalt text-paper" },
+  { code: "İŞ", cls: "bg-brand text-paper" },
 ];
 
 export function Hero() {

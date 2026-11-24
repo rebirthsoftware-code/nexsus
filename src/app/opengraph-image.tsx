@@ -7,29 +7,26 @@ export const alt = `${site.name} | ${site.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** Sosyal medyada link paylaşıldığında görünen kapak görseli (derleme anında üretilir). */
+/** Sosyal medyada link paylaşıldığında görünen kapak görseli. */
 export default async function OpengraphImage() {
-  const font = await readFile(join(process.cwd(), "src/assets/BricolageGrotesque-ExtraBold.ttf"));
-  const ink = "#14110f";
+  const [font, logo] = await Promise.all([
+    readFile(join(process.cwd(), "src/assets/BricolageGrotesque-ExtraBold.ttf")),
+    readFile(join(process.cwd(), "public/brand/nexus-logo.png")),
+  ]);
+  const ink = "#0b0b0c";
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: "#f3eee3", color: ink, fontFamily: "Bricolage", padding: 64, justifyContent: "space-between" }}>
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", fontSize: 26, letterSpacing: 2, border: `4px solid ${ink}`, borderRadius: 999, padding: "10px 24px", alignSelf: "flex-start" }}>
-            {site.university.toLocaleUpperCase("tr-TR")} · ÖĞRENCİ KULÜBÜ
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: "#f5f2ea", color: ink, fontFamily: "Bricolage", padding: 64, borderBottom: "28px solid #015efb" }}>
+        <img src={logoSrc} alt="" width={760} height={231} />
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", fontSize: 84, lineHeight: 1.05, letterSpacing: -4, maxWidth: 820 }}>
+            <span style={{ marginRight: 20 }}>Kampüsün</span>
+            <span style={{ background: "#015efb", color: "#f5f2ea", border: `5px solid ${ink}`, borderRadius: 20, padding: "0 20px 8px", marginRight: 20 }}>bağlantı</span>
+            <span>noktası.</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", fontSize: 124, lineHeight: 1, letterSpacing: -6 }}>
-            <div style={{ display: "flex" }}>Kampüsün</div>
-            <div style={{ display: "flex", alignSelf: "flex-start", background: "#c8f03c", border: `5px solid ${ink}`, borderRadius: 24, padding: "0 22px 12px", margin: "6px 0" }}>bağlantı</div>
-            <div style={{ display: "flex" }}>noktası.</div>
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", width: 330, height: 330, borderRadius: 999, background: "#2d3fe7", border: `6px solid ${ink}`, boxShadow: `12px 12px 0 ${ink}`, alignItems: "center", justifyContent: "center", color: "#f3eee3", fontSize: 76, letterSpacing: -3 }}>
-            NEXUS
-          </div>
-          <div style={{ display: "flex", fontSize: 30 }}>{site.instagramHandle}</div>
+          <div style={{ display: "flex", fontSize: 30, color: "#011e45" }}>{site.instagramHandle}</div>
         </div>
       </div>
     ),

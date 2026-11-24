@@ -10,16 +10,16 @@ export function Burst({ points = 12, inner = 0.78, className, strokeWidth = 2 }:
   }
   return (
     <svg viewBox="0 0 100 100" className={cn("overflow-visible", className)} aria-hidden="true">
-      <polygon points={pts.join(" ")} fill="currentColor" stroke="#14110f" strokeWidth={strokeWidth} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <polygon points={pts.join(" ")} fill="currentColor" stroke="#0b0b0c" strokeWidth={strokeWidth} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
 
-/** Dört köşeli parıltı; şerit ve başlıklarda ayraç olarak kullanılır. */
-export function Sparkle({ className }: { className?: string }) {
+/** Logodaki mavi ok; şeritlerde ve başlıklarda ayraç olarak kullanılır. */
+export function Chevron({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={cn("h-5 w-5", className)} aria-hidden="true">
-      <path d="M12 0c.9 6.6 4.5 10.2 12 12-7.5 1.8-11.1 5.4-12 12-.9-6.6-4.5-10.2-12-12c7.5-1.8 11.1-5.4 12-12z" fill="currentColor" />
+    <svg viewBox="0 0 286 450" className={cn("h-5 w-auto", className)} aria-hidden="true">
+      <polygon points="0,0 132,0 286,225 134,450 1,450 153,225" fill="currentColor" />
     </svg>
   );
 }
@@ -44,10 +44,12 @@ export function SpinBadge({ id, text, className, children }: { id: string; text:
 }
 
 /** Başlıklarda vurgulanan kelime: serif italik + fosforlu kalem bloğu. */
-export function Mark({ children, className = "bg-lime" }: { children: React.ReactNode; className?: string }) {
+export function Mark({ children, className = "bg-brand", tone }: { children: React.ReactNode; className?: string; tone?: "light" | "dark" }) {
+  // Mavi ve lacivert zeminde yazı açık renk olur
+  const lightText = tone ? tone === "light" : /bg-(brand|navy|ink)/.test(className);
   return (
-    <span className="relative inline-block whitespace-nowrap px-[0.14em]">
-      <span className={cn("absolute inset-x-0 bottom-[0.06em] top-[0.14em] -rotate-1 rounded-[0.18em] border-2 border-ink", className)} aria-hidden="true" />
+    <span className={cn("relative inline-block whitespace-nowrap px-[0.14em] leading-[1.14]", lightText && "text-paper")}>
+      <span className={cn("absolute inset-x-0 -bottom-[0.02em] top-[0.1em] -rotate-1 rounded-[0.18em] border-2 border-ink", className)} aria-hidden="true" />
       <span className="relative font-serif text-[1.06em] font-normal italic tracking-[-0.02em]">{children}</span>
     </span>
   );

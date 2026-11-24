@@ -42,7 +42,7 @@ export default async function HomePage() {
 
       {/* Kayan şerit */}
       <div className="overflow-x-clip py-6">
-        <Marquee items={tape} className="-rotate-[1.5deg] scale-[1.03] bg-ink font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
+        <Marquee items={tape} className="-rotate-[1.5deg] scale-[1.03] bg-navy font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
       </div>
 
       <Container className="mt-16 sm:mt-20">

@@ -52,7 +52,7 @@ export default function TeamPage() {
             <div>
               <p className="label-mono text-ink-soft">NX—???</p>
               <h2 className="display-tight mt-3 text-4xl sm:text-5xl">
-                Bir sonraki kart <span className="font-serif font-normal italic tracking-[-0.02em] text-cobalt">senin</span> olabilir.
+                Bir sonraki kart <span className="font-serif font-normal italic tracking-[-0.02em] text-brand">senin</span> olabilir.
               </h2>
               <p className="mt-3 max-w-lg text-lg leading-relaxed text-ink-soft">Her dönem koordinatörlük ekiplerine yeni arkadaşlar arıyoruz.</p>
             </div>

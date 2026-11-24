@@ -28,9 +28,9 @@ export function Navbar() {
     <>
       <header className="fixed inset-x-0 top-0 z-50 pt-3 sm:pt-4">
         <Container>
-          <nav className="flex items-center justify-between rounded-full border-2 border-ink bg-paper py-1.5 pl-3 pr-1.5 shadow-hard-sm" aria-label="Ana menü">
+          <nav className="flex items-center justify-between rounded-full border-2 border-ink bg-paper py-1.5 pl-4 pr-1.5 shadow-hard-sm" aria-label="Ana menü">
             <span onClick={close}>
-              <Logo />
+              <Logo priority className="h-6 sm:h-7" />
             </span>
 
             <ul className="hidden items-center gap-1 md:flex">
@@ -57,7 +57,7 @@ export function Navbar() {
               <Link
                 href="/basvuru"
                 onClick={close}
-                className="group inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-lime px-4 py-2 font-display text-sm font-bold tracking-tight transition-colors hover:bg-ink hover:text-lime"
+                className="group inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-brand px-4 py-2 font-display text-sm font-bold tracking-tight text-paper transition-colors hover:bg-navy"
               >
                 Üye ol
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
@@ -84,7 +84,7 @@ export function Navbar() {
         id="mobile-menu"
         inert={!open}
         className={cn(
-          "fixed inset-0 z-40 flex flex-col bg-cobalt px-6 pb-8 pt-28 text-paper transition-[clip-path] duration-500 ease-[cubic-bezier(0.7,0,0.2,1)] md:hidden",
+          "fixed inset-0 z-40 flex flex-col bg-navy px-6 pb-8 pt-28 text-paper transition-[clip-path] duration-500 ease-[cubic-bezier(0.7,0,0.2,1)] md:hidden",
           open ? "[clip-path:circle(150%_at_calc(100%-2.75rem)_2.5rem)]" : "[clip-path:circle(0%_at_calc(100%-2.75rem)_2.5rem)]"
         )}
       >
@@ -106,7 +106,7 @@ export function Navbar() {
           <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer" className="label-mono normal-case">
             {site.instagramHandle}
           </a>
-          <Link href="/basvuru" onClick={close} className="rounded-full border-2 border-ink bg-lime px-5 py-2.5 font-display font-bold text-ink">
+          <Link href="/basvuru" onClick={close} className="rounded-full border-2 border-paper bg-brand px-5 py-2.5 font-display font-bold text-paper">
             Üye ol
           </Link>
         </div>

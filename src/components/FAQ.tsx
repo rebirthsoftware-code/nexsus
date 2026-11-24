@@ -17,7 +17,7 @@ export function FAQ() {
               <button className="flex w-full items-center gap-4 px-5 py-4 text-left sm:px-6 sm:py-5" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen} aria-controls={`faq-${i}`}>
                 <span className="label-mono text-ink-soft">0{i + 1}</span>
                 <span className="flex-1 font-display text-lg font-bold tracking-tight sm:text-xl">{item.q}</span>
-                <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 border-ink transition-all duration-300", isOpen ? "rotate-45 bg-lime" : "bg-paper")} aria-hidden="true">
+                <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 border-ink transition-all duration-300", isOpen ? "rotate-45 bg-brand text-paper" : "bg-paper")} aria-hidden="true">
                   <Plus className="h-5 w-5" />
                 </span>
               </button>

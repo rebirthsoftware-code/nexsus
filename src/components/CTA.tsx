@@ -6,8 +6,8 @@ import { Burst, SpinBadge } from "./Shapes";
 export function CTA() {
   return (
     <Reveal>
-      <div className="relative overflow-hidden rounded-[2rem] border-2 border-ink bg-cobalt px-6 py-16 text-paper shadow-hard-lg sm:rounded-[2.5rem] sm:px-14 sm:py-24">
-        <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#f3eee3_1.2px,transparent_1.2px)] [background-size:22px_22px]" aria-hidden="true" />
+      <div className="relative overflow-hidden rounded-[2rem] border-2 border-ink bg-brand px-6 py-16 text-paper shadow-hard-lg sm:rounded-[2.5rem] sm:px-14 sm:py-24">
+        <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#f5f2ea_1.2px,transparent_1.2px)] [background-size:22px_22px]" aria-hidden="true" />
         <Burst points={10} inner={0.6} className="absolute -bottom-10 -left-10 h-40 w-40 rotate-12 text-coral" />
         <span className="absolute -right-8 top-10 hidden h-28 w-28 rounded-full border-2 border-ink bg-sun sm:block" aria-hidden="true" />
 
@@ -18,7 +18,7 @@ export function CTA() {
               Sıra <span className="font-serif font-normal italic tracking-[-0.02em] text-lime">sende.</span>
             </h2>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/85">Başvuru iki dakika sürüyor. Bölümün, sınıfın fark etmez; merakın yeter.</p>
-            <Button href="/basvuru" className="mt-8 px-8 py-4 text-base">
+            <Button href="/basvuru" variant="lime" className="mt-8 px-8 py-4 text-base">
               Başvuru formu <ArrowRight className="h-5 w-5" />
             </Button>
           </div>

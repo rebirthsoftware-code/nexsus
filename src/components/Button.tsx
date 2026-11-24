@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type Variant = "lime" | "ink" | "paper" | "cobalt";
+type Variant = "brand" | "lime" | "ink" | "paper";
 
 const base =
   "pressable inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink px-6 py-3 font-display text-[0.95rem] font-bold tracking-tight disabled:cursor-not-allowed disabled:opacity-60";
@@ -10,7 +10,7 @@ const variants: Record<Variant, string> = {
   lime: "bg-lime text-ink",
   ink: "bg-ink text-paper",
   paper: "bg-paper text-ink",
-  cobalt: "bg-cobalt text-paper",
+  brand: "bg-brand text-paper",
 };
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
   external?: boolean;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
 
-export function Button({ href, variant = "lime", className, children, external, ...rest }: Props) {
+export function Button({ href, variant = "brand", className, children, external, ...rest }: Props) {
   const classes = cn(base, variants[variant], className);
   if (href && external) {
     return (

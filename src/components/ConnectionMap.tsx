@@ -2,13 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { departments } from "@/content/site";
+import { MARK } from "./Logo";
 import { cn } from "@/lib/utils";
 
-const INK = "#14110f";
-const PAPER = "#f3eee3";
+const INK = "#0b0b0c";
+const PAPER = "#f5f2ea";
 const LIME = "#c8f03c";
 const CORAL = "#ff5b38";
-const DOTS = ["#ffc83d", "#ff5b38", "#b9a2ff", "#c8f03c", "#f3eee3"];
+const BRAND = "#015efb";
+const NAVY = "#011e45";
+
+const toPoints = (s: string) => s.split(" ").map((p) => p.split(",").map(Number) as [number, number]);
+const MARK_BLUE = toPoints(MARK.blue);
+const MARK_NAVY = toPoints(MARK.navy);
+const DOTS = ["#ffc83d", "#ff5b38", "#b9a2ff", "#c8f03c", "#f5f2ea"];
 
 type Node = {
   label: string;
@@ -123,7 +130,7 @@ export function ConnectionMap({ className }: { className?: string }) {
 
       // Merkezden bölümlere giden kesikli bağlar
       ctx.lineWidth = 1.3;
-      ctx.strokeStyle = "rgba(243,238,227,0.42)";
+      ctx.strokeStyle = "rgba(245,242,234,0.42)";
       ctx.setLineDash([3, 7]);
       ctx.lineDashOffset = -t * 14;
       for (const n of nodes) line(cx, cy, n.x, n.y);
@@ -137,7 +144,7 @@ export function ConnectionMap({ className }: { className?: string }) {
           const b = nodes[j];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d < near) {
-            ctx.strokeStyle = `rgba(243,238,227,${(1 - d / near) * 0.55})`;
+            ctx.strokeStyle = `rgba(245,242,234,${(1 - d / near) * 0.55})`;
             line(a.x, a.y, b.x, b.y);
           }
         }
@@ -157,7 +164,7 @@ export function ConnectionMap({ className }: { className?: string }) {
       // Merkez düğüm
       const hubR = Math.min(52, Math.min(w, h) * 0.11) + Math.sin(t * 1.8) * 1.5;
       ctx.lineWidth = 1.3;
-      ctx.strokeStyle = "rgba(243,238,227,0.5)";
+      ctx.strokeStyle = "rgba(245,242,234,0.5)";
       ctx.beginPath();
       ctx.arc(cx, cy, hubR + 12 + Math.sin(t * 1.8 + 1) * 3, 0, Math.PI * 2);
       ctx.stroke();
@@ -165,18 +172,28 @@ export function ConnectionMap({ className }: { className?: string }) {
       ctx.beginPath();
       ctx.arc(cx + 3, cy + 3, hubR, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = LIME;
+      ctx.fillStyle = PAPER;
       ctx.strokeStyle = INK;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = INK;
-      ctx.font = `800 ${Math.round(hubR * 0.36)}px ${displayFace}`;
-      ctx.textAlign = "center";
+      // Logodaki X işareti
+      const scale = (hubR * 1.02) / MARK.width;
+      const mx = cx - (MARK.width * scale) / 2;
+      const my = cy - (MARK.height * scale) / 2;
+      for (const [points, color] of [
+        [MARK_BLUE, BRAND],
+        [MARK_NAVY, NAVY],
+      ] as const) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        points.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(mx + px * scale, my + py * scale) : ctx.lineTo(mx + px * scale, my + py * scale)));
+        ctx.closePath();
+        ctx.fill();
+      }
       ctx.textBaseline = "middle";
-      ctx.fillText("NEXUS", cx, cy + 1);
 
       // Bölüm etiketleri
       ctx.font = pillFont;
@@ -316,9 +333,9 @@ export function ConnectionMap({ className }: { className?: string }) {
   return (
     <div
       ref={wrapRef}
-      className={cn("relative touch-pan-y select-none overflow-hidden rounded-[2rem] border-2 border-ink bg-cobalt shadow-hard-lg", className)}
+      className={cn("relative touch-pan-y select-none overflow-hidden rounded-[2rem] border-2 border-ink bg-brand shadow-hard-lg", className)}
     >
-      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle,#f3eee3_1.2px,transparent_1.2px)] [background-size:22px_22px]" aria-hidden="true" />
+      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle,#f5f2ea_1.2px,transparent_1.2px)] [background-size:22px_22px]" aria-hidden="true" />
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden="true" />
       <p className="sr-only">
         Farklı bölümlerin Nexus etrafında birbirine bağlandığını gösteren etkileşimli çizim.

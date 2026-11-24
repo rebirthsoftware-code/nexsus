@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 
-const dots = ["bg-coral", "bg-cobalt", "bg-lime", "bg-sun"];
+const dots = ["bg-coral", "bg-brand", "bg-lime", "bg-sun"];
 
 function Counter({ value, suffix }: { value: number; suffix: string }) {
   const ref = useRef<HTMLSpanElement>(null);

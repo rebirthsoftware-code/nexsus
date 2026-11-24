@@ -2,9 +2,9 @@
 
 /*
  * Nexus tasarım sistemi
- * Fikir: "kampüs afişi". Krem kağıt zemin, mürekkep siyahı çizgiler ve her biri
- * farklı bir bölümü temsil eden canlı renkler. Renkleri kulübün logosuna göre
- * değiştirmek için aşağıdaki --color-* değerlerini güncellemek yeterlidir.
+ * Fikir: "kampüs afişi". Krem kağıt zemin, siyah çizgiler ve logonun mavisi ile
+ * laciverti. Diğer canlı renkler (limon, mercan, sarı, lila) farklı bölümleri
+ * temsil eden yardımcı vurgulardır.
  */
 @theme {
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
@@ -12,11 +12,13 @@
   --font-serif: var(--font-serif-face), Georgia, serif;
   --font-mono: var(--font-mono-face), ui-monospace, monospace;
 
-  --color-paper: #f3eee3;
-  --color-paper-deep: #e7dfcd;
-  --color-ink: #14110f;
-  --color-ink-soft: #57504a;
-  --color-cobalt: #2d3fe7;
+  --color-paper: #f5f2ea;
+  --color-paper-deep: #e8e3d6;
+  --color-ink: #0b0b0c;
+  --color-ink-soft: #55524d;
+  /* Logodan ölçülen kurumsal renkler */
+  --color-brand: #015efb;
+  --color-navy: #011e45;
   --color-coral: #ff5b38;
   --color-lime: #c8f03c;
   --color-lilac: #b9a2ff;
@@ -70,7 +72,7 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-cobalt);
+  outline: 3px solid var(--color-brand);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -118,7 +120,7 @@ body {
 }
 
 @utility dot-grid {
-  background-image: radial-gradient(circle, rgb(20 17 15 / 0.16) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(circle, rgb(11 11 12 / 0.16) 1.2px, transparent 1.2px);
   background-size: 22px 22px;
 }
 

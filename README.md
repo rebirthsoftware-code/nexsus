@@ -6,12 +6,24 @@ Karabük Üniversitesi **Nexus** öğrenci kulübünün tanıtım sitesi. Nexus 
 
 "Kampüs afişi": krem kağıt zemin, mürekkep siyahı kalın çizgiler, sert gölgeler ve her biri bir bölümü temsil eden canlı renkler. Öne çıkan parçalar:
 
-- **Bağlantı haritası** (ana sayfa): Canvas ile çizilen etkileşimli ağ. Her etiket bir bölüm, ortadaki düğüm Nexus. İmleç "Sen" düğümüdür; yaklaştığı bölümlerle bağ kurar ve sayaç güncellenir.
+- **Bağlantı haritası** (ana sayfa): Canvas ile çizilen etkileşimli ağ. Her etiket bir bölüm, ortadaki düğüm Nexus logosunun X işareti. İmleç "Sen" düğümüdür; yaklaştığı bölümlerle bağ kurar ve sayaç güncellenir.
 - **Bilet görünümlü etkinlik kartları**: tarih koçanı, kategori rengi ve "X gün kaldı" sayacı. Tarihi geçen etkinlik kendiliğinden "geçmiş"e düşer.
 - **Yaka kartı görünümlü ekip kartları**.
 - **Canlı üye kartı** (başvuru sayfası): form doldurulurken kart anında güncellenir, gönderince üzerine "Başvuru alındı" damgası basılır.
 
-Renkler ve yazı tipleri tek yerden yönetilir: `src/app/globals.css` içindeki `@theme` bloğu. Kulübün logosuna göre renkleri oradan değiştirebilirsiniz.
+Renkler ve yazı tipleri tek yerden yönetilir: `src/app/globals.css` içindeki `@theme` bloğu. Ana renkler kulüp logosundan ölçülmüştür: mavi `#015efb`, lacivert `#011e45` ve siyah. Limon, mercan, sarı ve lila farklı bölümleri temsil eden yardımcı vurgulardır.
+
+## Logo
+
+Logo dosyaları `public/brand/` altındadır ve `src/components/Logo.tsx` üzerinden kullanılır:
+
+| Dosya | Kullanım |
+| --- | --- |
+| `nexus-wordmark.png` | Yalnızca NEXUS yazısı; menü ve küçük alanlar |
+| `nexus-logo.png` | Altında "Karabük Üniversitesi" yazan tam logo |
+| `nexus-*-light.png` | Koyu zeminler için açık sürüm (harfler beyaz, mavi ok aynı) |
+
+Logodaki X işareti ayrıca SVG olarak çizilmiştir (`LogoMark`); favicon'da, bağlantı haritasının merkezinde ve kayan şeritlerdeki ok ayraçlarında kullanılır.
 
 ## Teknolojiler
 

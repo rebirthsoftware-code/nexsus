@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin } from "lucide-react";
 import { site, navLinks } from "@/content/site";
@@ -14,11 +15,11 @@ export function Footer() {
   ].filter((s) => s.href);
 
   return (
-    <footer className="relative mt-28 overflow-hidden rounded-t-[2rem] bg-ink text-paper sm:rounded-t-[3rem]">
+    <footer className="relative mt-28 overflow-hidden rounded-t-[2rem] bg-navy text-paper sm:rounded-t-[3rem]">
       <Container className="pb-8 pt-16 sm:pt-20">
         <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
           <div>
-            <Logo invert />
+            <Logo variant="full" light className="h-14 sm:h-[4.5rem]" />
             <p className="display-tight mt-8 max-w-xl text-4xl sm:text-5xl">
               Bir sonraki etkinlikte <span className="font-serif font-normal italic tracking-[-0.02em] text-lime">görüşelim.</span>
             </p>
@@ -76,12 +77,12 @@ export function Footer() {
         </div>
       </Container>
 
-      {/* Dev kelime işareti */}
-      <p className="display-tight pointer-events-none -mb-[0.16em] select-none text-center text-[25.5vw] leading-none text-[#2b2622]" aria-hidden="true">
-        NEXUS
-      </p>
+      {/* Dev logo: zemine gömülü filigran */}
+      <div className="pointer-events-none select-none px-5 pb-6 pt-4 sm:px-8" aria-hidden="true">
+        <Image src="/brand/nexus-wordmark-light.png" alt="" width={1600} height={387} sizes="100vw" className="mx-auto w-full max-w-[76rem] opacity-[0.09]" />
+      </div>
 
-      <div className="relative border-t-2 border-paper/15 bg-ink">
+      <div className="relative border-t-2 border-paper/15 bg-navy">
         <Container className="flex flex-col items-start justify-between gap-2 py-5 text-xs text-paper/60 sm:flex-row sm:items-center">
           <p>
             © {site.foundedYear}–<Year fallback={site.foundedYear + 2} /> {site.fullName} · {site.university}

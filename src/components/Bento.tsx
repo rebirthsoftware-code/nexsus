@@ -58,7 +58,7 @@ export function Bento() {
         tag="Ağ"
         title="Bölümünün dışına çık."
         text="Mühendislikten tıbba, işletmeden psikolojiye: kampüsün her köşesinden insanla tanış, başka türlü düşünenlerle aynı masada otur."
-        className="bg-cobalt text-paper md:col-span-4 md:min-h-[22rem]"
+        className="bg-brand text-paper md:col-span-4 md:min-h-[22rem]"
       >
         <ul className="absolute right-5 top-5 flex -space-x-3 sm:right-7 sm:top-7" aria-hidden="true">
           {people.map((p) => (
@@ -84,7 +84,7 @@ export function Bento() {
         </IconDisc>
       </Tile>
 
-      <Tile index="04" tag="Kariyer" title="Mezunlar anlatıyor, sen soruyorsun." text="Sektörden insanlarla söyleşiler, staj ve iş fırsatları." className="bg-paper md:col-span-2" delay={80}>
+      <Tile index="04" tag="Kariyer" title="Mezunlar anlatıyor, sen soruyorsun." text="Sektörden insanlarla söyleşiler, staj ve iş fırsatları." className="bg-navy text-paper md:col-span-2" delay={80}>
         <IconDisc className="bg-sun">
           <Briefcase className="h-6 w-6" />
         </IconDisc>

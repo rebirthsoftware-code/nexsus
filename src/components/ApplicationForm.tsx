@@ -11,10 +11,10 @@ import { MemberCard } from "./MemberCard";
 import { Button } from "./Button";
 
 const inputCls =
-  "w-full rounded-xl border-2 border-ink bg-white/60 px-4 py-3 text-base text-ink placeholder:text-ink/35 outline-none transition-all focus:bg-white focus:shadow-[4px_4px_0_0_var(--color-cobalt)] focus-visible:outline-none aria-[invalid=true]:border-coral aria-[invalid=true]:shadow-[4px_4px_0_0_var(--color-coral)]";
+  "w-full rounded-xl border-2 border-ink bg-white/60 px-4 py-3 text-base text-ink placeholder:text-ink/35 outline-none transition-all focus:bg-white focus:shadow-[4px_4px_0_0_var(--color-brand)] focus-visible:outline-none aria-[invalid=true]:border-coral aria-[invalid=true]:shadow-[4px_4px_0_0_var(--color-coral)]";
 
 const chipCls =
-  "block cursor-pointer rounded-full border-2 border-ink bg-paper px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 peer-checked:bg-lime peer-checked:shadow-hard-sm peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt";
+  "block cursor-pointer rounded-full border-2 border-ink bg-paper px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 peer-checked:bg-brand peer-checked:text-paper peer-checked:shadow-hard-sm peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand";
 
 function ErrorText({ children }: { children?: string }) {
   if (!children) return null;
@@ -100,12 +100,12 @@ export function ApplicationForm() {
 
   if (status === "success" && submitted) {
     return (
-      <div ref={successRef} className="grid items-center gap-12 rounded-[2rem] border-2 border-ink bg-lime p-8 shadow-hard-lg sm:p-14 lg:grid-cols-[19rem_1fr] lg:gap-16">
+      <div ref={successRef} className="grid items-center gap-12 rounded-[2rem] border-2 border-ink bg-brand p-8 text-paper shadow-hard-lg sm:p-14 lg:grid-cols-[19rem_1fr] lg:gap-16">
         <MemberCard name={submitted.fullName} department={submitted.department} classYear={submitted.classYear} interests={submitted.interests} stamped />
         <div role="status">
           <p className="label-mono">Başvuru alındı</p>
           <h2 className="display-tight mt-4 text-5xl sm:text-6xl">Hoş geldin, {submitted.fullName.trim().split(/\s+/)[0]}!</h2>
-          <p className="mt-5 max-w-md text-lg leading-relaxed">
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/90">
             Başvurun bize ulaştı. Ekipten biri en kısa sürede sana yazacak. O zamana kadar duyuruları kaçırmamak için Instagram&apos;da buluşalım.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -209,7 +209,7 @@ export function ApplicationForm() {
           <input {...register("website")} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
           <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-ink-soft">
-            <input type="checkbox" {...register("consent")} className="mt-0.5 h-5 w-5 shrink-0 accent-[#14110f]" />
+            <input type="checkbox" {...register("consent")} className="mt-0.5 h-5 w-5 shrink-0 accent-[#0b0b0c]" />
             <span>
               Paylaştığım bilgilerin yalnızca kulüp üyelik süreci ve etkinlik duyuruları için kullanılmasını kabul ediyorum.
               <ErrorText>{errors.consent?.message}</ErrorText>

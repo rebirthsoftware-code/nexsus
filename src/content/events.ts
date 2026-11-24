@@ -18,7 +18,7 @@ export type ClubEvent = {
 
 export const categoryAccent: Record<EventCategory, Accent> = {
   Sertifika: "lime",
-  Kariyer: "cobalt",
+  Kariyer: "brand",
   Atölye: "sun",
   Sosyal: "coral",
   Seminer: "lilac",
