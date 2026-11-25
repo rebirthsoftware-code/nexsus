@@ -1,8 +1,9 @@
 import { asset } from "@/lib/utils";
+import { VAPID_PUBLIC_KEY } from "./config";
 import type { Backend } from "./types";
 
-/** Bildirim sunucusunun açık anahtarı (herkese açıktır). Tanımlı değilse yalnızca uygulama açıkken bildirim gösterilir. */
-export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+// Bildirim sunucusunun açık anahtarı tanımlı değilse yalnızca uygulama açıkken bildirim gösterilir.
+export { VAPID_PUBLIC_KEY };
 
 export type NotificationState = "unsupported" | "needs-install" | "default" | "denied" | "granted";
 

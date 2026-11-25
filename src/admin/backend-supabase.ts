@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { AdminUser, Application, ApplicationPatch, Backend, Honorific, Role, Status, TeamMember } from "./types";
+import { DELETE_DENIED, type AdminUser, type Application, type ApplicationPatch, type Backend, type Honorific, type Role, type Status, type TeamMember } from "./types";
 
 /** Veritabanındaki satır (bkz. supabase/schema.sql) */
 type Row = {
@@ -113,8 +113,10 @@ export function createSupabaseBackend(url: string, anonKey: string): Backend {
       if (error) throw new Error("Değişiklik kaydedilemedi.");
     },
     async remove(id) {
-      const { error } = await sb.from("applications").delete().eq("id", id);
+      // Veritabanı kuralı gereği yalnızca başkan silebilir; yetkisiz istekte hiçbir satır silinmez
+      const { data, error } = await sb.from("applications").delete().eq("id", id).select("id");
       if (error) throw new Error("Başvuru silinemedi.");
+      if (!data?.length) throw new Error(DELETE_DENIED);
     },
     subscribe(onEvent) {
       const channel = sb

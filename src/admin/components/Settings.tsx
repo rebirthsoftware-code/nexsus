@@ -266,7 +266,7 @@ export function Settings({
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs leading-relaxed text-ink-soft">Panele yalnızca bu ekip girebilir: bir başkan ve iki başkan yardımcısı.</p>
+        <p className="mt-3 text-xs leading-relaxed text-ink-soft">Panele yalnızca bu ekip girebilir: bir başkan ve iki başkan yardımcısı. Herkes başvuruları görür ve durumunu değiştirir; kalıcı silme yetkisi yalnızca başkandadır.</p>
       </Card>
     </div>
   );

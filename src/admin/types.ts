@@ -50,6 +50,14 @@ export type TeamMember = {
 /** Giriş yapmış yönetici */
 export type AdminUser = TeamMember & { email: string };
 
+/**
+ * Yetkiler. Başkan yardımcıları başvuruları görür, durumunu ve notunu değiştirir;
+ * kalıcı silme yalnızca başkandadır. Aynı kural veritabanında da uygulanır.
+ */
+export const canDelete = (person: Pick<TeamMember, "role">) => person.role === "baskan";
+
+export const DELETE_DENIED = "Başvuruyu yalnızca başkan silebilir.";
+
 /** "Ahmet Yılmaz" + "Bey" → "Ahmet Bey" (iki adı olanlarda: "Ali Kemal Bey") */
 export function addressName(person: Pick<TeamMember, "fullName" | "honorific">) {
   const parts = person.fullName.trim().split(/\s+/).filter(Boolean);

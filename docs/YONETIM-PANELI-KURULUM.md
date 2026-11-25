@@ -51,6 +51,8 @@ Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes
 
 Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir; dördüncü kişi eklenmeye çalışılırsa komut hata verir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez.
 
+**Yetkiler:** Üç kişi de başvuruları görür, arar, durumunu ve notunu değiştirir. Bir başvuruyu **kalıcı olarak silmek yalnızca başkana** açıktır; bu kural da veritabanında tanımlıdır.
+
 Panel ayrıca her başvurunun durumunu **kimin** değiştirdiğini gösterir ("Durumu Elif Hanım güncelledi"). Bu bilgiyi veritabanı kendisi kaydeder; elle değiştirilemez.
 
 **Birini değiştirmek için** (ör. yeni dönemde başkan değişti): eski kişiyi **Authentication → Users** bölümünden sil (ekip kaydı da silinir), yeni kişiyi 1. ve 2. adımla ekle. Yalnızca adı ya da hitabı düzeltmek için:
@@ -67,18 +69,20 @@ where user_id = (select id from auth.users where email = 'kisi@ornek.com');
 1. Supabase'de **Project Settings → API** sayfasından iki değeri kopyala:
    - **Project URL** (ör. `https://abcd1234.supabase.co`)
    - **anon / public** anahtarı
-2. GitHub deposunda **Settings → Secrets and variables → Actions → Variables** sekmesinde iki değişken oluştur:
+2. Depodaki [`src/admin/config.ts`](../src/admin/config.ts) dosyasını aç ve iki değeri tırnakların arasına yapıştır:
 
-   | Ad | Değer |
-   | --- | --- |
-   | `SUPABASE_URL` | Project URL |
-   | `SUPABASE_ANON_KEY` | anon / public anahtarı |
+   ```ts
+   supabaseUrl: "https://abcd1234.supabase.co",
+   supabaseAnonKey: "eyJhbGciOi...",
+   ```
 
-3. **Actions → Siteyi yayınla (GitHub Pages) → Run workflow** ile siteyi yeniden yayınla.
+3. Değişikliği gönder (commit). Site kendiliğinden yeniden yayınlanır.
 
 Artık başvuru formu kayıtları veritabanına yazar ve `/admin` adresinde gerçek hesapla giriş yapılır.
 
-> **Dikkat:** `service_role` anahtarını hiçbir zaman GitHub'a ya da siteye yazma. O anahtar tüm kuralları aşar. Sitede yalnızca `anon` anahtarı kullanılır; o anahtar herkese açık olacak şekilde tasarlanmıştır.
+Bu iki değer herkese açık değerlerdir: siteyi açan herkesin tarayıcısına zaten gönderilir. Koruma, 2. adımda kurulan erişim kurallarıyla sağlanır. Dosyaya yazmak istemezsen aynı değerleri GitHub'da **Settings → Secrets and variables → Actions → Variables** altında `SUPABASE_URL` ve `SUPABASE_ANON_KEY` adlarıyla da verebilirsin.
+
+> **Dikkat:** `service_role` anahtarını ve veritabanı şifresini hiçbir zaman depoya, siteye ya da bir sohbete yazma. O anahtar tüm kuralları aşar. Sitede yalnızca `anon` anahtarı kullanılır.
 
 ## 5. Bildirimleri kur (uygulama kapalıyken de gelsin)
 
@@ -106,7 +110,7 @@ console.log("VAPID_PRIVATE_KEY =", j.d);
 
 ### 5b. Açık anahtarı siteye ver
 
-GitHub'da (4. adımdaki yerde) bir değişken daha oluştur: `VAPID_PUBLIC_KEY` = açık anahtar. Sonra siteyi yeniden yayınla.
+[`src/admin/config.ts`](../src/admin/config.ts) dosyasındaki `vapidPublicKey` alanına **açık** anahtarı yapıştır ve değişikliği gönder. (GitHub değişkeni olarak vermek istersen adı `VAPID_PUBLIC_KEY`.)
 
 ### 5c. Bildirim fonksiyonunu yükle
 
@@ -146,7 +150,7 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 
 | Belirti | Olası neden |
 | --- | --- |
-| Panel hâlâ "Demo modu" diyor | GitHub değişkenleri eksik ya da site değişkenlerden sonra yeniden yayınlanmadı |
+| Panel hâlâ "Demo modu" diyor | `src/admin/config.ts` içindeki iki değer boş ya da değişiklik gönderilmedi |
 | "Bu hesabın yönetim paneli yetkisi yok" | Hesap yönetim ekibine (`admins` tablosu) eklenmemiş: 3. adımdaki SQL |
 | "Yalnızca bir başkan olabilir" hatası | Ekipte zaten bir başkan var; önce eskisini sil ya da görevini değiştir |
 | Form "kaydedilemedi" diyor | `schema.sql` çalıştırılmamış ya da anon anahtarı yanlış kopyalanmış |
@@ -164,7 +168,7 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 
 Depodaki kod yerelde şu şekilde sınandı:
 
-- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; ekipte olmayan hesap hiçbir kaydı göremiyor; ekip bir başkan ve iki yardımcıyla sınırlı; "kim işlem yaptı" kaydı sahtelenemiyor.
+- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; ekipte olmayan hesap hiçbir kaydı göremiyor; ekip bir başkan ve iki yardımcıyla sınırlı; silme yalnızca başkanda (arayüz atlansa bile); "kim işlem yaptı" kaydı sahtelenemiyor.
 - Form → veritabanı → panel akışı tarayıcıda: üç ayrı hesapla giriş ve kişiye özel karşılama, yetkisiz hesap, durum ve not değişikliği, silme.
 - Bildirim şifrelemesi bağımsız kütüphanelerle; uygulamanın bildirimi gösterip doğru başvuruya yönlendirmesi tarayıcıda.
 

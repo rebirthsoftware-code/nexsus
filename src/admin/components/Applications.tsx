@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, Check, Download, Inbox, Mail, MessageCircle, Phone, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Download, Inbox, Lock, Mail, MessageCircle, Phone, Search, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { downloadFile, fullDate, timeAgo, toCsv, whatsappLink } from "../format";
-import { addressName, statusMeta, statusOrder, type AdminUser, type Application, type ApplicationPatch, type Status, type TeamMember } from "../types";
+import { addressName, canDelete, DELETE_DENIED, statusMeta, statusOrder, type AdminUser, type Application, type ApplicationPatch, type Status, type TeamMember } from "../types";
 import { Avatar, StatusPill } from "./ui";
 
 export type Filter = "all" | Status;
@@ -336,7 +336,11 @@ function Detail({
         </div>
 
         <div className="border-t-2 border-dashed border-ink/30 pt-5">
-          {confirmDelete ? (
+          {!canDelete(me) ? (
+            <p className="flex items-center gap-2 text-sm text-ink-soft">
+              <Lock className="h-4 w-4 shrink-0" aria-hidden="true" /> {DELETE_DENIED}
+            </p>
+          ) : confirmDelete ? (
             <div className="rounded-2xl border-2 border-ink bg-coral p-4">
               <p className="font-display font-extrabold tracking-tight">Bu başvuru kalıcı olarak silinsin mi?</p>
               <p className="text-sm">Bu işlem geri alınamaz.</p>

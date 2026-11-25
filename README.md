@@ -79,7 +79,7 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 
 `/admin` adresinde üyelik başvurularının yönetildiği bir panel vardır. Telefona ve bilgisayara uygulama olarak yüklenebilir (PWA) ve yeni başvurularda bildirim gönderir.
 
-- **Kişiye özel:** panel üç kişiliktir (bir başkan, iki başkan yardımcısı). Herkes kendi hesabıyla girer, adıyla karşılanır ("Hoş geldiniz, Ahmet Bey") ve başvurularda durumu kimin değiştirdiği görünür.
+- **Kişiye özel:** panel üç kişiliktir (bir başkan, iki başkan yardımcısı). Herkes kendi hesabıyla girer, adıyla karşılanır ("Hoş geldiniz, Ahmet Bey") ve başvurularda durumu kimin değiştirdiği görünür. Kalıcı silme yalnızca başkandadır.
 - **Giriş:** e-posta ve şifre. Yalnızca yönetim ekibindeki hesaplar veri görebilir.
 - **Özet:** yeni, toplam ve onaylanan başvuru sayıları, son 14 günün grafiği, en çok ilgi çeken konular.
 - **Başvurular:** arama, duruma göre filtre, ayrıntı, tek dokunuşla arama / WhatsApp / e-posta, durum ve yönetici notu, silme, Excel'e aktarma.
@@ -92,6 +92,7 @@ Teknik yapı:
 | Parça | Yer |
 | --- | --- |
 | Panel arayüzü | `src/admin/components/` |
+| Bağlantı ayarları (herkese açık değerler) | `src/admin/config.ts` |
 | Veri katmanı (demo ve Supabase) | `src/admin/backend*.ts` |
 | Bildirim ve uygulama yükleme | `src/admin/push.ts`, `public/admin-sw.js`, `src/app/admin/manifest.webmanifest/` |
 | Veritabanı şeması ve erişim kuralları | `supabase/schema.sql` |

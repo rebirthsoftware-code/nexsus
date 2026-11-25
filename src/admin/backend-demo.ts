@@ -1,5 +1,5 @@
 import { demoTeam, randomApplication, seedApplications } from "./demo-data";
-import type { AdminUser, Application, Backend, BackendEvent } from "./types";
+import { canDelete, DELETE_DENIED, type AdminUser, type Application, type Backend, type BackendEvent } from "./types";
 
 const DATA_KEY = "nexus-panel-demo-veri-v2";
 const USER_KEY = "nexus-panel-demo-oturum";
@@ -76,6 +76,8 @@ export function createDemoBackend(): Backend {
       write(read().map((a) => (a.id === id ? { ...a, ...patch, ...stamp } : a)));
     },
     async remove(id) {
+      const user = currentUser();
+      if (!user || !canDelete(user)) throw new Error(DELETE_DENIED);
       write(read().filter((a) => a.id !== id));
     },
     subscribe(onEvent) {

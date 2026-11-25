@@ -6,7 +6,7 @@
 --
 -- Güvenlik modeli (satır düzeyinde güvenlik, RLS):
 --   * Herkes (anon)        : yalnızca yeni başvuru EKLEYEBİLİR; hiçbir şeyi okuyamaz.
---   * Yöneticiler (admins) : başvuruları okur, günceller, siler.
+--   * Yönetim ekibi (admins): başvuruları okur ve günceller. Kalıcı silme yalnızca başkandadır.
 --   * Giriş yapmış ama yönetici listesinde olmayan biri hiçbir şeyi göremez.
 -- Sitedeki "anon" anahtarı herkese açıktır; korumayı aşağıdaki kurallar sağlar.
 -- =====================================================================
@@ -114,6 +114,20 @@ $$;
 revoke all on function public.is_admin() from public;
 grant execute on function public.is_admin() to anon, authenticated;
 
+-- İsteği yapan kişi başkan mı? (Kalıcı silme gibi yalnızca başkana açık işlemler için)
+create or replace function public.is_president()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.admins where user_id = auth.uid() and role = 'baskan');
+$$;
+
+revoke all on function public.is_president() from public;
+grant execute on function public.is_president() to anon, authenticated;
+
 -- Başvurunun durumu değiştiğinde kimin, ne zaman değiştirdiğini kaydet.
 -- Bu alanlar tarayıcıdan gelen değere bakılmadan burada doldurulur; elle değiştirilemez.
 create or replace function public.applications_stamp_handler()
@@ -159,8 +173,9 @@ create policy "basvuru_guncelle" on public.applications
   for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "basvuru_sil" on public.applications;
+-- Kalıcı silme yalnızca başkandadır
 create policy "basvuru_sil" on public.applications
-  for delete to authenticated using (public.is_admin());
+  for delete to authenticated using (public.is_president());
 
 -- Yönetim ekibi: yalnızca ekip üyeleri ekibi görebilir (panel adları ve görevleri buradan okur).
 -- Ekipte olmayan bir hesap hiçbir satır göremez. Ekleme, değiştirme ve silme yalnızca

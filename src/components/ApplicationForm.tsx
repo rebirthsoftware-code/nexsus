@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Clock3, Loader2, Send, ShieldCheck, Users2 } from "lucide-react";
 import { applicationSchema, attractions, classYears, studentNoFromEmail, STUDENT_EMAIL_DOMAIN, type ApplicationInput } from "@/lib/schema";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/admin/config";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { MemberCard } from "./MemberCard";
@@ -56,8 +57,6 @@ const ENDPOINT = process.env.NEXT_PUBLIC_APPLICATION_ENDPOINT;
  * panelde görünür. Buradaki anahtar herkese açıktır; ziyaretçiler yalnızca başvuru ekleyebilir,
  * hiçbir kaydı okuyamaz (kurallar veritabanında tanımlıdır, bkz. supabase/schema.sql).
  */
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const CAN_SUBMIT = Boolean((SUPABASE_URL && SUPABASE_ANON_KEY) || ENDPOINT);
 
 const SAVE_ERROR = "Başvuru şu an kaydedilemedi, lütfen biraz sonra tekrar dene.";
