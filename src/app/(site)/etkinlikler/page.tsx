@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Container } from "@/components/Container";
 import { EventsExplorer } from "@/components/EventsExplorer";
@@ -36,6 +38,12 @@ export default async function EventsPage() {
       />
       <Container>
         <EventsExplorer today={today} />
+        <p className="mt-14 flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-dashed border-ink/30 pt-6 text-lg text-ink-soft">
+          Geçmiş etkinliklerden fotoğraflar mı arıyorsun?
+          <Link href="/sizden-kalanlar" className="inline-flex items-center gap-1.5 border-b-2 border-ink font-display font-bold text-ink">
+            Sizden Kalanlar <ArrowRight className="h-4 w-4" />
+          </Link>
+        </p>
       </Container>
       <Container className="mt-24">
         <CTA />

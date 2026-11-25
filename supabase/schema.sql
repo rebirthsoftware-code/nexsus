@@ -17,7 +17,8 @@ create table if not exists public.applications (
   id          uuid primary key default gen_random_uuid(),
   created_at  timestamptz not null default now(),
   full_name   text not null check (char_length(full_name) between 3 and 80),
-  email       text not null check (char_length(email) between 5 and 120 and position('@' in email) > 1),
+  -- Yalnızca üniversitenin öğrenci e-postası kabul edilir (form da aynı kuralı uygular)
+  email       text not null check (char_length(email) <= 120 and email ~* '^[^@[:space:]]+@ogrenci\.karabuk\.edu\.tr$'),
   phone       text not null check (char_length(phone) between 10 and 20),
   department  text not null check (char_length(department) between 2 and 80),
   class_year  text not null check (char_length(class_year) between 1 and 40),
@@ -30,6 +31,11 @@ create table if not exists public.applications (
   seen        boolean not null default false,
   notified    boolean not null default false
 );
+
+-- Tablo daha önce eski e-posta kuralıyla kurulduysa kuralı güncelle (eski kayıtlara dokunmaz)
+alter table public.applications drop constraint if exists applications_email_check;
+alter table public.applications add constraint applications_email_check
+  check (char_length(email) <= 120 and email ~* '^[^@[:space:]]+@ogrenci\.karabuk\.edu\.tr$') not valid;
 
 create index if not exists applications_created_at_idx on public.applications (created_at desc);
 

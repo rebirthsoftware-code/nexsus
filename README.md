@@ -29,7 +29,7 @@ Logodaki X işareti ayrıca SVG olarak çizilmiştir (`LogoMark`); favicon'da, b
 
 - **Next.js 16** (App Router, statik dışa aktarım) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** ile özel tasarım sistemi
-- **react-hook-form + zod** ile doğrulanan başvuru formu
+- **react-hook-form + zod** ile doğrulanan başvuru formu (yalnızca `@ogrenci.karabuk.edu.tr` e-postası kabul edilir)
 - Canvas 2D ile yazılmış, kütüphanesiz etkileşimli animasyon
 - `next/font` (Bricolage Grotesque, DM Sans, Instrument Serif, JetBrains Mono)
 - SEO: `metadata`, otomatik üretilen Open Graph kapak görseli, `sitemap.xml`, `robots.txt`
@@ -54,6 +54,8 @@ npm run lint
 | Kulüp adı, açıklama, e-posta, sosyal medya, istatistikler, bölüm listesi | `src/content/site.ts` |
 | Ekip üyeleri (isim, görev, bölüm, renk, klip, fotoğraf) | `src/content/team.ts` – dosyalar `public/team/` |
 | Etkinlikler | `src/content/events.ts` |
+| Duyurular (gezi, stant, ekip alımı...) | `src/content/announcements.ts` |
+| Fotoğraflar (Sizden Kalanlar) | `fotograflar/` klasörü |
 | Sıkça sorulan sorular | `src/content/faq.ts` |
 | Üyelik formu alanları ve "en çok ne ilgini çekiyor" seçenekleri | `src/lib/schema.ts` |
 
@@ -94,6 +96,22 @@ Teknik yapı:
 | Veritabanı şeması ve erişim kuralları | `supabase/schema.sql` |
 | Bildirim gönderen sunucu fonksiyonu | `supabase/functions/yeni-basvuru-bildirimi/` |
 
+## Duyurular
+
+Etkinlik takvimine girmeyen her şey (gezi, stant, ekip alımı, genel haber) `/duyurular` sayfasında yayınlanır. Yeni duyuru eklemek için `src/content/announcements.ts` dosyasındaki listeye bir kayıt eklemek yeterlidir.
+
+- `deadline` verilirse kartta "5 gün kaldı" sayacı görünür; tarih geçince duyuru kendiliğinden "Geçmiş duyurular"a düşer.
+- `pinned: true` olan duyuru en üstte, büyük kart olarak durur.
+- En güncel duyuru ana sayfanın üstünde tek satırlık bir şerit olarak da görünür.
+
+## Sizden Kalanlar (fotoğraflar)
+
+Stant, etkinlik ve gezi fotoğrafları `/sizden-kalanlar` sayfasında şipşak fotoğraf görünümünde dizilir; ana sayfada en yeni dört kare önizleme olarak yer alır.
+
+Fotoğraf eklemek için kod yazmak gerekmez: `fotograflar/` klasöründe tarihle başlayan bir klasör açıp fotoğrafları içine atmak yeterlidir. Ayrıntılar: **[fotograflar/BENIOKU.md](fotograflar/BENIOKU.md)**
+
+Yayın sırasında `scripts/build-gallery.mjs` fotoğrafları küçültür, telefonun yön bilgisini uygular ve konum gibi gömülü bilgileri kopyalara aktarmaz. Özgün dosyalar siteye yüklenmez.
+
 ## Ekip klipleri (GIF gibi dönen videolar)
 
 Ekip kartlarında her üye için kısa, sessiz, döngülü bir klip gösterilebilir. Gerçek GIF yerine MP4 kullanılır: aynı görüntü yaklaşık 10 kat daha küçük dosyayla gelir ve telefonda da kendiliğinden oynar. Klipler yalnızca ekranda görünürken oynar, her kartta durdur/oynat düğmesi vardır.
@@ -126,7 +144,7 @@ Site statik olduğu için başvurular tarayıcıdan doğrudan kayıt yerine gön
 
 ```
 src/
-  app/            sayfalar (/, /hakkimizda, /etkinlikler, /ekip, /basvuru, /iletisim) ve kapak görseli
+  app/            sayfalar (/, /hakkimizda, /duyurular, /etkinlikler, /sizden-kalanlar, /ekip, /basvuru, /iletisim, /admin)
   components/     bileşenler (ConnectionMap, EventTicket, TeamCard, MemberCard, ApplicationForm ...)
   content/        tüm metin ve veri içeriği
   admin/          yönetim paneli (arayüz, veri katmanı, bildirimler)
@@ -134,4 +152,5 @@ src/
   assets/         kapak görselinde kullanılan yazı tipi
 supabase/         veritabanı şeması ve bildirim fonksiyonu
 docs/             kurulum rehberleri
+fotograflar/      Sizden Kalanlar sayfasının fotoğrafları (albüm klasörleri)
 ```

@@ -34,7 +34,7 @@ export function Navbar() {
               <Logo priority className="h-6 sm:h-7" />
             </span>
 
-            <ul className="hidden items-center gap-1 md:flex">
+            <ul className="hidden items-center gap-0.5 lg:flex">
               {navLinks.map((l) => {
                 const active = pathname.startsWith(l.href);
                 return (
@@ -43,7 +43,7 @@ export function Navbar() {
                       href={l.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                        "rounded-full px-3.5 py-2 text-sm font-semibold transition-colors xl:px-4",
                         active ? "bg-ink text-paper" : "text-ink hover:bg-paper-deep"
                       )}
                     >
@@ -64,7 +64,7 @@ export function Navbar() {
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </Link>
               <button
-                className="grid h-10 w-10 place-items-center rounded-full border-2 border-ink bg-paper md:hidden"
+                className="grid h-10 w-10 place-items-center rounded-full border-2 border-ink bg-paper lg:hidden"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
@@ -85,7 +85,7 @@ export function Navbar() {
         id="mobile-menu"
         inert={!open}
         className={cn(
-          "fixed inset-0 z-40 flex flex-col bg-navy px-6 pb-8 pt-28 text-paper transition-[clip-path] duration-500 ease-[cubic-bezier(0.7,0,0.2,1)] md:hidden",
+          "fixed inset-0 z-40 flex flex-col bg-navy px-6 pb-8 pt-28 text-paper transition-[clip-path] duration-500 ease-[cubic-bezier(0.7,0,0.2,1)] lg:hidden",
           open ? "[clip-path:circle(150%_at_calc(100%-2.75rem)_2.5rem)]" : "[clip-path:circle(0%_at_calc(100%-2.75rem)_2.5rem)]"
         )}
       >
@@ -96,7 +96,7 @@ export function Navbar() {
               className={cn("transition-all duration-500", open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0")}
               style={{ transitionDelay: open ? `${120 + i * 60}ms` : "0ms" }}
             >
-              <Link href={l.href} onClick={close} className="display-tight flex items-baseline gap-3 py-1.5 text-5xl">
+              <Link href={l.href} onClick={close} className="display-tight flex items-baseline gap-3 whitespace-nowrap py-1 text-[clamp(1.75rem,min(5.4dvh,9.5vw),3rem)]">
                 <span className="label-mono text-lime">0{i + 1}</span>
                 {l.label}
               </Link>

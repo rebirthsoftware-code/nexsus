@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Megaphone } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { Container } from "@/components/Container";
 import { Marquee } from "@/components/Marquee";
@@ -12,6 +12,8 @@ import { TeamCard } from "@/components/TeamCard";
 import { FAQ } from "@/components/FAQ";
 import { CTA } from "@/components/CTA";
 import { SocialTiles } from "@/components/SocialTiles";
+import { HomeGallery } from "@/components/HomeGallery";
+import { splitAnnouncements } from "@/content/announcements";
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/Button";
 import { Mark, SectionLabel } from "@/components/Shapes";
@@ -34,6 +36,8 @@ function TextLink({ href, children }: { href: string; children: React.ReactNode 
 export default async function HomePage() {
   const today = await getToday();
   const { upcoming, past } = splitEvents(today);
+  // Menüdeki "Duyurular" sayfasından en güncel duyuru, ana sayfanın üstünde tek satır olarak görünür
+  const headline = splitAnnouncements(today).active[0];
   const [next, ...rest] = [...upcoming, ...past];
   const others = rest.slice(0, 2);
   const leadership = team[0]?.members.slice(0, 4) ?? [];
@@ -47,7 +51,25 @@ export default async function HomePage() {
         <Marquee items={tape} className="-rotate-[1.5deg] scale-[1.03] bg-navy font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
       </div>
 
-      <Container className="mt-16 sm:mt-20">
+      {headline && (
+        <Container className="mt-8">
+          <Reveal>
+            <Link
+              href={`/duyurular#${headline.slug}`}
+              className="pressable group flex items-center gap-3 rounded-full border-2 border-ink bg-paper py-2 pl-2 pr-4 sm:gap-4"
+            >
+              <span className="label-mono flex shrink-0 items-center gap-1.5 rounded-full border-2 border-ink bg-coral px-3 py-1.5">
+                <Megaphone className="h-3.5 w-3.5" aria-hidden="true" /> Duyuru
+              </span>
+              <span className="min-w-0 flex-1 truncate font-display font-bold tracking-tight sm:text-lg">{headline.title}</span>
+              <span className="label-mono hidden shrink-0 text-ink-soft sm:inline">Tüm duyurular</span>
+              <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Reveal>
+        </Container>
+      )}
+
+      <Container className="mt-12 sm:mt-16">
         <Reveal>
           <Stats />
         </Reveal>
@@ -162,11 +184,27 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* 07 Sosyal medya */}
-      <section className="pb-24 sm:pb-32">
+      {/* 07 Sizden kalanlar */}
+      <section className="overflow-x-clip border-y-2 border-ink bg-paper-deep py-24 sm:py-32">
+        <Container>
+          <Reveal className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <SectionLabel index="07">Sizden kalanlar</SectionLabel>
+              <h2 className="display-tight mt-6 text-5xl sm:text-6xl lg:text-7xl">
+                Geriye <Mark className="bg-lime">kareler</Mark> kaldı.
+              </h2>
+            </div>
+            <p className="max-w-sm text-lg leading-relaxed text-ink-soft">Stantlardan, etkinliklerden ve gezilerden bizde kalan fotoğraflar.</p>
+          </Reveal>
+          <HomeGallery />
+        </Container>
+      </section>
+
+      {/* 08 Sosyal medya */}
+      <section className="py-24 sm:py-32">
         <Container>
           <Reveal className="mb-12">
-            <SectionLabel index="07">Sosyal medya</SectionLabel>
+            <SectionLabel index="08">Sosyal medya</SectionLabel>
             <h2 className="display-tight mt-6 text-5xl sm:text-6xl lg:text-7xl">
               Bizi <Mark className="bg-coral">takipte</Mark> kal.
             </h2>

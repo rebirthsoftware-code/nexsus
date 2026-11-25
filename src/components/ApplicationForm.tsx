@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Clock3, Loader2, Send, ShieldCheck, Users2 } from "lucide-react";
-import { applicationSchema, attractions, classYears, type ApplicationInput } from "@/lib/schema";
+import { applicationSchema, attractions, classYears, studentNoFromEmail, STUDENT_EMAIL_DOMAIN, type ApplicationInput } from "@/lib/schema";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { MemberCard } from "./MemberCard";
@@ -73,7 +73,8 @@ async function saveApplication(a: Omit<ApplicationInput, "website" | "consent">)
         phone: a.phone,
         department: a.department,
         class_year: a.classYear,
-        student_no: a.studentNo || null,
+        // Öğrenci numarası e-postanın başındaki kısımdır; ayrıca sorulmaz
+        student_no: studentNoFromEmail(a.email),
         attractions: a.attractions,
         note: a.note || null,
       }),
@@ -86,7 +87,7 @@ async function saveApplication(a: Omit<ApplicationInput, "website" | "consent">)
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ ...a, submittedAt: new Date().toISOString(), source: "nexus-web" }),
+      body: JSON.stringify({ ...a, studentNo: studentNoFromEmail(a.email), submittedAt: new Date().toISOString(), source: "nexus-web" }),
     });
     if (!res.ok) throw new Error(SAVE_ERROR);
   }
@@ -109,8 +110,8 @@ function summarize(d: Omit<ApplicationInput, "website" | "consent">) {
     "Nexus üyelik başvurusu",
     `Ad soyad: ${d.fullName}`,
     `Bölüm: ${d.department} (${d.classYear})`,
-    d.studentNo ? `Öğrenci no: ${d.studentNo}` : null,
     `E-posta: ${d.email}`,
+    studentNoFromEmail(d.email) ? `Öğrenci no: ${studentNoFromEmail(d.email)}` : null,
     `Telefon: ${d.phone}`,
     `En çok ilgisini çeken: ${d.attractions.join(", ")}`,
     d.note ? `Not: ${d.note}` : null,
@@ -139,7 +140,7 @@ export function ApplicationForm() {
     formState: { errors },
   } = useForm<ApplicationInput>({
     resolver: zodResolver(applicationSchema),
-    defaultValues: { attractions: [], note: "", studentNo: "", website: "" },
+    defaultValues: { attractions: [], note: "", website: "" },
   });
 
   const [fullName, department, classYear, selected, note] = useWatch({
@@ -269,20 +270,24 @@ export function ApplicationForm() {
             <Field label="Ad soyad" error={errors.fullName?.message}>
               <input {...register("fullName")} className={inputCls} placeholder="Ayşe Yılmaz" autoComplete="name" aria-invalid={!!errors.fullName} />
             </Field>
-            <Field label="E-posta" error={errors.email?.message}>
-              <input {...register("email")} type="email" className={inputCls} placeholder="ad.soyad@ogrenci.karabuk.edu.tr" autoComplete="email" aria-invalid={!!errors.email} />
+            <Field label="Öğrenci e-postası" hint={`Yalnızca @${STUDENT_EMAIL_DOMAIN} uzantılı adres kabul edilir`} error={errors.email?.message}>
+              <input
+                {...register("email")}
+                type="email"
+                className={inputCls}
+                placeholder={`öğrenci.numarası@${STUDENT_EMAIL_DOMAIN}`}
+                autoComplete="email"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-invalid={!!errors.email}
+              />
             </Field>
             <Field label="Telefon" error={errors.phone?.message}>
               <input {...register("phone")} type="tel" className={inputCls} placeholder="05xx xxx xx xx" autoComplete="tel" aria-invalid={!!errors.phone} />
             </Field>
-            <Field label="Öğrenci numarası" hint="İsteğe bağlı" error={errors.studentNo?.message}>
-              <input {...register("studentNo")} className={inputCls} placeholder="2024XXXXXX" inputMode="numeric" />
+            <Field label="Bölüm" error={errors.department?.message}>
+              <input {...register("department")} className={inputCls} placeholder="Bilgisayar Mühendisliği" aria-invalid={!!errors.department} />
             </Field>
-            <div className="sm:col-span-2">
-              <Field label="Bölüm" error={errors.department?.message}>
-                <input {...register("department")} className={inputCls} placeholder="Bilgisayar Mühendisliği" aria-invalid={!!errors.department} />
-              </Field>
-            </div>
           </div>
 
           <div className="mt-6" role="radiogroup" aria-label="Sınıf">

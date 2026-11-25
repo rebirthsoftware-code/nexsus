@@ -40,7 +40,9 @@ export const site = {
 
 export const navLinks = [
   { href: "/hakkimizda", label: "Hakkımızda" },
+  { href: "/duyurular", label: "Duyurular" },
   { href: "/etkinlikler", label: "Etkinlikler" },
+  { href: "/sizden-kalanlar", label: "Sizden Kalanlar" },
   { href: "/ekip", label: "Ekip" },
   { href: "/iletisim", label: "İletişim" },
 ] as const;

@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# "Sizden Kalanlar" galerisi: fotograflar/ klasöründen derleme sırasında üretilir
+/public/galeri/
