@@ -71,6 +71,10 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 
 Özel alan adı kullanılacaksa Settings → Pages bölümünden eklenir; alt yol (`/nexsus`) kendiliğinden kalkar.
 
+### Vercel
+
+Depo Vercel'e bağlanırsa ek ayar gerekmez: site kök adreste yayınlanır ve yayın adresi kendiliğinden algılanır. Veritabanı Vercel'in Supabase eklentisiyle eklenirse bağlantı değerleri de kendiliğinden tanımlanır (bkz. kurulum rehberi). Vercel her gece yeniden derlemediği için etkinliklerdeki gün sayaçları orada yalnızca yeni bir gönderimde güncellenir.
+
 ### Önizleme modu
 
 `src/content/site.ts` içindeki `preview: true` iken sitede "Önizleme" şeridi görünür ve site arama motorlarına kapalıdır. Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirildikten sonra `false` yapın.

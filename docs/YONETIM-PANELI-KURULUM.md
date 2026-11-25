@@ -14,6 +14,20 @@ Veritabanı olarak [Supabase](https://supabase.com) kullanılır: ücretsiz katm
 
 ---
 
+## Site Vercel'de yayınlanıyorsa: kısa yol
+
+Vercel, Supabase veritabanını kendi panelinden ekleyebilir ve bağlantı değerlerini projeye kendiliğinden tanımlar. Bu durumda aşağıdaki **1. ve 4. adımları atla**:
+
+1. Vercel'de projeyi aç. **Storage** sekmesinden (ya da **Marketplace → Supabase**) yeni bir Supabase veritabanı oluştur. Bölge olarak **Frankfurt** seç ve veritabanını bu projeye bağla.
+2. **Deployments** sekmesinde son yayını **Redeploy** et. Bağlantı değerleri ancak yeniden yayından sonra siteye işlenir.
+3. Vercel'deki veritabanı sayfasından **Open in Supabase** ile Supabase panelini aç ve aşağıdaki **2. adımdan** devam et (tablolar), ardından **3. adım** (yönetim ekibi).
+
+Kontrol: **Settings → Environment Variables** altında `NEXT_PUBLIC_SUPABASE_URL` ve `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (eski kurulumlarda `..._ANON_KEY`) görünmeli. Site ikisini de tanır.
+
+Yeniden yayından sonra `/admin` adresinde "Kim giriyor?" yerine e-posta ve şifre soran giriş ekranı çıkıyorsa bağlantı kurulmuştur.
+
+---
+
 ## 1. Supabase projesi aç
 
 1. [supabase.com](https://supabase.com) adresinde ücretsiz hesap aç.
@@ -68,7 +82,7 @@ where user_id = (select id from auth.users where email = 'kisi@ornek.com');
 
 1. Supabase'de **Project Settings → API** sayfasından iki değeri kopyala:
    - **Project URL** (ör. `https://abcd1234.supabase.co`)
-   - **anon / public** anahtarı
+   - **publishable** anahtarı (eski projelerde adı **anon / public**)
 2. Depodaki [`src/admin/config.ts`](../src/admin/config.ts) dosyasını aç ve iki değeri tırnakların arasına yapıştır:
 
    ```ts
@@ -150,7 +164,7 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 
 | Belirti | Olası neden |
 | --- | --- |
-| Panel hâlâ "Demo modu" diyor | `src/admin/config.ts` içindeki iki değer boş ya da değişiklik gönderilmedi |
+| Panel hâlâ "Demo modu" diyor | Vercel'de: veritabanı projeye bağlanmamış ya da bağlandıktan sonra Redeploy yapılmamış. GitHub Pages'te: `src/admin/config.ts` içindeki iki değer boş |
 | "Bu hesabın yönetim paneli yetkisi yok" | Hesap yönetim ekibine (`admins` tablosu) eklenmemiş: 3. adımdaki SQL |
 | "Yalnızca bir başkan olabilir" hatası | Ekipte zaten bir başkan var; önce eskisini sil ya da görevini değiştir |
 | Form "kaydedilemedi" diyor | `schema.sql` çalıştırılmamış ya da anon anahtarı yanlış kopyalanmış |
