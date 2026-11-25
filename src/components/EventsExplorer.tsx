@@ -7,11 +7,13 @@ import { site } from "@/content/site";
 import { EventTicket } from "./EventTicket";
 import { Button } from "./Button";
 import { cn } from "@/lib/utils";
+import { useToday } from "@/lib/useToday";
 
 type Filter = "Tümü" | EventCategory;
 
 /** Etkinlik takvimi: kategoriye göre filtrelenebilir, yaklaşan ve geçmiş olarak ayrılır. */
-export function EventsExplorer({ today }: { today: string }) {
+export function EventsExplorer({ today: buildDate }: { today: string }) {
+  const today = useToday(buildDate);
   const [filter, setFilter] = useState<Filter>("Tümü");
   const all = splitEvents(today);
   const match = (c: EventCategory) => filter === "Tümü" || c === filter;

@@ -1,23 +1,21 @@
 import Link from "next/link";
-import { ArrowRight, Megaphone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { Container } from "@/components/Container";
 import { Marquee } from "@/components/Marquee";
 import { Stats } from "@/components/Stats";
 import { Bento } from "@/components/Bento";
 import { CertificateSpotlight } from "@/components/CertificateSpotlight";
-import { EventTicket } from "@/components/EventTicket";
+import { HomeEvents, HomeHeadline } from "@/components/HomeLive";
 import { Steps } from "@/components/Steps";
 import { TeamCard } from "@/components/TeamCard";
 import { FAQ } from "@/components/FAQ";
 import { CTA } from "@/components/CTA";
 import { SocialTiles } from "@/components/SocialTiles";
 import { HomeGallery } from "@/components/HomeGallery";
-import { splitAnnouncements } from "@/content/announcements";
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/Button";
 import { Mark, SectionLabel } from "@/components/Shapes";
-import { splitEvents } from "@/content/events";
 import { team } from "@/content/team";
 import { getToday } from "@/lib/today";
 
@@ -35,11 +33,6 @@ function TextLink({ href, children }: { href: string; children: React.ReactNode 
 
 export default async function HomePage() {
   const today = await getToday();
-  const { upcoming, past } = splitEvents(today);
-  // Menüdeki "Duyurular" sayfasından en güncel duyuru, ana sayfanın üstünde tek satır olarak görünür
-  const headline = splitAnnouncements(today).active[0];
-  const [next, ...rest] = [...upcoming, ...past];
-  const others = rest.slice(0, 2);
   const leadership = team[0]?.members.slice(0, 4) ?? [];
 
   return (
@@ -51,23 +44,9 @@ export default async function HomePage() {
         <Marquee items={tape} className="-rotate-[1.5deg] scale-[1.03] bg-navy font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl" />
       </div>
 
-      {headline && (
-        <Container className="mt-8">
-          <Reveal>
-            <Link
-              href={`/duyurular#${headline.slug}`}
-              className="pressable group flex items-center gap-3 rounded-full border-2 border-ink bg-paper py-2 pl-2 pr-4 sm:gap-4"
-            >
-              <span className="label-mono flex shrink-0 items-center gap-1.5 rounded-full border-2 border-ink bg-coral px-3 py-1.5">
-                <Megaphone className="h-3.5 w-3.5" aria-hidden="true" /> Duyuru
-              </span>
-              <span className="min-w-0 flex-1 truncate font-display font-bold tracking-tight sm:text-lg">{headline.title}</span>
-              <span className="label-mono hidden shrink-0 text-ink-soft sm:inline">Tüm duyurular</span>
-              <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Reveal>
-        </Container>
-      )}
+      <Container className="mt-8 empty:hidden">
+        <HomeHeadline buildDate={today} />
+      </Container>
 
       <Container className="mt-12 sm:mt-16">
         <Reveal>
@@ -105,18 +84,7 @@ export default async function HomePage() {
             </div>
             <TextLink href="/etkinlikler">Tüm etkinlikler</TextLink>
           </Reveal>
-          {next && (
-            <Reveal>
-              <EventTicket event={next} today={today} featured />
-            </Reveal>
-          )}
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {others.map((e, i) => (
-              <Reveal key={e.slug} delay={i * 100}>
-                <EventTicket event={e} today={today} />
-              </Reveal>
-            ))}
-          </div>
+          <HomeEvents buildDate={today} />
         </Container>
       </section>
 

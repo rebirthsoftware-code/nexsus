@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Megaphone } from "lucide-react";
 import { announcementCategories, splitAnnouncements, type AnnouncementCategory } from "@/content/announcements";
 import { cn } from "@/lib/utils";
+import { useToday } from "@/lib/useToday";
 import { AnnouncementCard } from "./AnnouncementCard";
 
 type Filter = "Tümü" | AnnouncementCategory;
 
 /** Duyuru panosu: türe göre filtrelenir; süresi dolanlar ayrı bir bölümde durur. */
-export function AnnouncementsBoard({ today }: { today: string }) {
+export function AnnouncementsBoard({ today: buildDate }: { today: string }) {
+  const today = useToday(buildDate);
   const [filter, setFilter] = useState<Filter>("Tümü");
   const all = splitAnnouncements(today);
   const match = (c: AnnouncementCategory) => filter === "Tümü" || c === filter;

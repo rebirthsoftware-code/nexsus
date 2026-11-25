@@ -73,7 +73,7 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 
 ### Vercel
 
-Depo Vercel'e bağlanırsa ek ayar gerekmez: site kök adreste yayınlanır ve yayın adresi kendiliğinden algılanır. Veritabanı Vercel'in Supabase eklentisiyle eklenirse bağlantı değerleri de kendiliğinden tanımlanır (bkz. kurulum rehberi). Vercel her gece yeniden derlemediği için etkinliklerdeki gün sayaçları orada yalnızca yeni bir gönderimde güncellenir.
+Depo Vercel'e bağlanırsa ek ayar gerekmez: site kök adreste yayınlanır ve yayın adresi kendiliğinden algılanır. Veritabanı Vercel'in Supabase eklentisiyle eklenirse bağlantı değerleri de kendiliğinden tanımlanır (bkz. kurulum rehberi). Etkinlik ve duyurulardaki gün sayaçları tarayıcıda hesaplandığı için yeniden derleme gerekmeden güncel kalır.
 
 ### Önizleme modu
 
