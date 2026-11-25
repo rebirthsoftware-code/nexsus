@@ -4,7 +4,7 @@ import { BellRing, ChevronRight, Inbox } from "lucide-react";
 import { attractions as attractionOptions } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import { dayKey, timeAgo } from "../format";
-import { addressName, roleLabel, type AdminUser, type Application } from "../types";
+import { greetingParts, roleLabel, rolePill, type AdminUser, type Application } from "../types";
 import { Avatar, Card, CardTitle, StatusPill } from "./ui";
 
 const DAYS = 14;
@@ -50,6 +50,7 @@ export function Overview({
 
   const departments = [...apps.reduce((m, a) => m.set(a.department, (m.get(a.department) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1]).slice(0, 5);
 
+  const hello = greetingParts(user);
   const hour = now.getHours();
   const greeting = hour < 6 ? "İyi geceler" : hour < 12 ? "Günaydın" : hour < 18 ? "İyi günler" : "İyi akşamlar";
   const stats = [
@@ -63,11 +64,12 @@ export function Overview({
     <div className="space-y-5">
       <header>
         <p className="label-mono inline-flex items-center gap-2 text-ink-soft">
-          <span className={cn("rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun text-ink")}>{roleLabel[user.role]}</span>
+          <span className={cn("rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", rolePill[user.role])}>{roleLabel[user.role]}</span>
           Nexus yönetim paneli
         </p>
         <h1 className="display-tight mt-2 text-4xl sm:text-5xl">
-          {greeting}, {addressName(user).replace(` ${user.honorific}`, "")} <span className="font-serif font-normal italic tracking-[-0.02em] text-brand">{user.honorific}</span>.
+          {greeting}, {hello.name}
+          {hello.honorific && <span className="font-serif font-normal italic tracking-[-0.02em] text-brand"> {hello.honorific}</span>}.
         </h1>
         <p className="mt-2 text-ink-soft">
           {counts.fresh > 0 ? (

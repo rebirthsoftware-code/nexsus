@@ -7,7 +7,7 @@
  * Kapsamı yalnızca /admin/ yoludur; herkese açık siteyi etkilemez.
  */
 const CACHE = "nexus-panel-v1";
-const SCOPE = self.registration.scope; // ör. https://site/nexsus/admin/
+const SCOPE = self.registration.scope; // ör. https://site/admin/ ya da https://site/alt-yol/admin/
 
 self.addEventListener("install", () => self.skipWaiting());
 

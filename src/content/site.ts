@@ -9,8 +9,8 @@ export const site = {
   tagline: "Kampüsün bağlantı noktası",
   description:
     "Nexus, Karabük Üniversitesi'nde tüm bölümlerden öğrencileri bir araya getiren öğrenci kulübü. Projeler, eğitimler ve etkinliklerle kişisel ve mesleki gelişim, disiplinler arası etkileşim.",
-  /** Sitenin yayın adresi. GitHub Pages yayınında otomatik verilir; özel alan adı alınırsa burayı güncelleyin. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://rebirthsoftware-code.github.io/nexsus").replace(/\/$/, ""),
+  /** Sitenin yayın adresi. Vercel ve GitHub Pages yayınında otomatik verilir; özel alan adı için NEXT_PUBLIC_SITE_URL tanımlayın. */
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
   /**
    * true iken sitede "önizleme" şeridi görünür ve arama motorlarına kapalıdır.
    * Ekip, etkinlik ve sayılar gerçek bilgilerle değiştirilince false yapın.

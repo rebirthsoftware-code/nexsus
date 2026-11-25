@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { DELETE_DENIED, type AdminUser, type Application, type ApplicationPatch, type Backend, type Honorific, type Role, type Status, type TeamMember } from "./types";
+import { DELETE_DENIED, type AdminUser, type Application, type ApplicationPatch, type Backend, type Honorific, type ManagedMember, type Role, type Status, type TeamMember } from "./types";
 
 /** Veritabanındaki satır (bkz. supabase/schema.sql) */
 type Row = {
@@ -20,7 +20,10 @@ type Row = {
   handled_at: string | null;
 };
 
-type AdminRow = { user_id: string; full_name: string; role: Role; honorific: Honorific };
+type AdminRow = { user_id: string; full_name: string; role: Role; honorific: Honorific | null };
+type ManagedRow = AdminRow & { email: string; last_sign_in_at: string | null };
+
+const roleRank: Record<Role, number> = { baskan: 0, baskan_yardimcisi: 1, yazilimci: 2 };
 
 const toMember = (r: AdminRow): TeamMember => ({ id: r.user_id, fullName: r.full_name, role: r.role, honorific: r.honorific });
 
@@ -53,6 +56,16 @@ function toRowPatch(patch: ApplicationPatch) {
 }
 
 const NOT_ADMIN = "Bu hesabın yönetim paneli yetkisi yok.";
+
+/**
+ * Veritabanı fonksiyonlarının hata iletileri kullanıcıya gösterilecek biçimde (Türkçe) yazılmıştır;
+ * bağlantı sorunu gibi başka hatalarda genel bir ileti gösterilir.
+ */
+function rpcError(error: { message?: string; code?: string }, fallback: string) {
+  // P0001: fonksiyonun kendi "raise exception" iletisi · 42501: yetki yok
+  if ((error.code === "P0001" || error.code === "42501") && error.message) return new Error(error.message);
+  return new Error(fallback);
+}
 
 /**
  * Supabase arka ucu: e-posta ve şifreyle giriş, satır düzeyinde güvenlik (RLS) ile korunan
@@ -95,10 +108,49 @@ export function createSupabaseBackend(url: string, anonKey: string): Backend {
       return requireAdmin(data.user.id, data.user.email ?? email);
     },
     async listTeam() {
-      const { data, error } = await sb.from("admins").select("user_id,full_name,role,honorific");
+      const { data, error } = await sb.from("admins").select("user_id,full_name,role,honorific").neq("role", "yazilimci");
       if (error) return [];
       // Başkan en üstte, sonra ada göre
-      return (data as AdminRow[]).map(toMember).sort((a, b) => Number(b.role === "baskan") - Number(a.role === "baskan") || a.fullName.localeCompare(b.fullName, "tr"));
+      return (data as AdminRow[]).map(toMember).sort((a, b) => roleRank[a.role] - roleRank[b.role] || a.fullName.localeCompare(b.fullName, "tr"));
+    },
+    async changePassword(password) {
+      const { error } = await sb.rpc("account_set_password", { p_password: password });
+      if (error) throw rpcError(error, "Şifre değiştirilemedi. Bağlantını kontrol edip tekrar dene.");
+    },
+    manage: {
+      async checkin() {
+        const { data, error } = await sb.rpc("developer_checkin");
+        return !error && data === true;
+      },
+      async list() {
+        const { data, error } = await sb.rpc("team_list");
+        if (error) throw rpcError(error, "Ekip yüklenemedi. Bağlantını kontrol edip tekrar dene.");
+        return ((data ?? []) as ManagedRow[])
+          .map((r): ManagedMember => ({ ...toMember(r), email: r.email, lastSignInAt: r.last_sign_in_at }))
+          .sort((a, b) => roleRank[a.role] - roleRank[b.role]);
+      },
+      async create(member) {
+        const { error } = await sb.rpc("team_create", {
+          p_email: member.email.trim(),
+          p_password: member.password,
+          p_full_name: member.fullName.trim(),
+          p_role: member.role,
+          p_honorific: member.honorific,
+        });
+        if (error) throw rpcError(error, "Kişi eklenemedi. Bağlantını kontrol edip tekrar dene.");
+      },
+      async update(id, patch) {
+        const { error } = await sb.rpc("team_update", { p_user_id: id, p_full_name: patch.fullName.trim(), p_role: patch.role, p_honorific: patch.honorific });
+        if (error) throw rpcError(error, "Değişiklik kaydedilemedi. Bağlantını kontrol edip tekrar dene.");
+      },
+      async setPassword(id, password) {
+        const { error } = await sb.rpc("team_set_password", { p_user_id: id, p_password: password });
+        if (error) throw rpcError(error, "Şifre yenilenemedi. Bağlantını kontrol edip tekrar dene.");
+      },
+      async remove(id) {
+        const { error } = await sb.rpc("team_remove", { p_user_id: id });
+        if (error) throw rpcError(error, "Kişi kaldırılamadı. Bağlantını kontrol edip tekrar dene.");
+      },
     },
     async signOut() {
       await sb.auth.signOut();
@@ -113,7 +165,7 @@ export function createSupabaseBackend(url: string, anonKey: string): Backend {
       if (error) throw new Error("Değişiklik kaydedilemedi.");
     },
     async remove(id) {
-      // Veritabanı kuralı gereği yalnızca başkan silebilir; yetkisiz istekte hiçbir satır silinmez
+      // Veritabanı kuralı gereği yalnızca başkan (ve yazılımcı) silebilir; yetkisiz istekte hiçbir satır silinmez
       const { data, error } = await sb.from("applications").delete().eq("id", id).select("id");
       if (error) throw new Error("Başvuru silinemedi.");
       if (!data?.length) throw new Error(DELETE_DENIED);

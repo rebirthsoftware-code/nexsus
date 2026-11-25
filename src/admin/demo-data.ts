@@ -1,14 +1,19 @@
+import { site } from "@/content/site";
 import type { AdminUser, Application, Status } from "./types";
 
 /**
  * Demo modunda giriş ekranında seçilebilen kurgusal yönetim ekibi.
  * Gerçek kurulumda ekip veritabanındaki "admins" tablosundan gelir.
+ * Demo modunda yazılımcının yaptığı değişiklikler yalnızca o tarayıcıda saklanır.
  */
 export const demoTeam: AdminUser[] = [
   { id: "demo-baskan", fullName: "Ahmet Yılmaz", role: "baskan", honorific: "Bey", email: "ahmet@ornek.edu.tr" },
   { id: "demo-yardimci-1", fullName: "Elif Demir", role: "baskan_yardimcisi", honorific: "Hanım", email: "elif@ornek.edu.tr" },
   { id: "demo-yardimci-2", fullName: "Mert Kaya", role: "baskan_yardimcisi", honorific: "Bey", email: "mert@ornek.edu.tr" },
 ];
+
+/** Demo modundaki yazılımcı hesabı: ekip yönetimi bölümünü denemek içindir */
+export const demoDeveloper: AdminUser = { id: "demo-yazilimci", fullName: site.developer.name, role: "yazilimci", honorific: null, email: "yazilimci@ornek.com" };
 
 /** Demo modunda gösterilen kurgusal başvurular. Gerçek kişilerle ilgisi yoktur. */
 const people: Array<[string, string, string, string[], Status, number, string | null]> = [

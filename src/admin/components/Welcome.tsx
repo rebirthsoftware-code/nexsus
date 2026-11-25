@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
-import { addressName, roleLabel, type AdminUser } from "../types";
+import { addressName, greetingParts, roleLabel, rolePill, type AdminUser } from "../types";
 
 /** Girişten hemen sonra kısa bir süre görünen kişiye özel karşılama. Dokununca ya da kendiliğinden kapanır. */
 export function Welcome({ user, onDone }: { user: AdminUser; onDone: () => void }) {
@@ -11,6 +11,8 @@ export function Welcome({ user, onDone }: { user: AdminUser; onDone: () => void 
     const timer = setTimeout(onDone, 2400);
     return () => clearTimeout(timer);
   }, [onDone]);
+
+  const { name, honorific } = greetingParts(user);
 
   return (
     <button
@@ -25,10 +27,11 @@ export function Welcome({ user, onDone }: { user: AdminUser; onDone: () => void 
         Hoş geldiniz
       </span>
       <span className="display-tight animate-rise relative mt-3 text-[clamp(2.75rem,min(13vw,20vh),6rem)]" style={{ animationDelay: "250ms" }}>
-        {addressName(user).replace(` ${user.honorific}`, "")} <span className="font-serif font-normal italic tracking-[-0.02em] text-lime">{user.honorific}</span>
+        {name}
+        {honorific && <span className="font-serif font-normal italic tracking-[-0.02em] text-lime"> {honorific}</span>}
       </span>
       <span
-        className={cn("label-mono animate-rise relative mt-6 rounded-full border-2 border-ink px-3 py-1.5 short:mt-3", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun text-ink")}
+        className={cn("label-mono animate-rise relative mt-6 rounded-full border-2 border-ink px-3 py-1.5 short:mt-3", user.role === "yazilimci" ? "border-lime bg-ink text-lime" : rolePill[user.role])}
         style={{ animationDelay: "400ms" }}
       >
         {roleLabel[user.role]}

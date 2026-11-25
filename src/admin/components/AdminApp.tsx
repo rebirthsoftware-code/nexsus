@@ -1,24 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Inbox, LayoutDashboard, Loader2, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { Inbox, LayoutDashboard, Loader2, LogOut, Settings as SettingsIcon, Users } from "lucide-react";
 import { Logo, LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import { loadBackend } from "../backend";
 import { getNotificationState, registerServiceWorker, setBadge, showNotification } from "../push";
-import { roleLabel, type AdminUser, type Application, type ApplicationPatch, type Backend, type TeamMember } from "../types";
+import { canManageTeam, roleLabel, type AdminUser, type Application, type ApplicationPatch, type Backend, type TeamMember } from "../types";
 import { Applications, type Filter } from "./Applications";
 import { Login } from "./Login";
 import { Overview } from "./Overview";
 import { Settings } from "./Settings";
+import { TeamAdmin } from "./TeamAdmin";
 import { Avatar, Toasts, useToasts } from "./ui";
 import { Welcome } from "./Welcome";
 
-type Tab = "ozet" | "basvurular" | "ayarlar";
+type Tab = "ozet" | "basvurular" | "ekip" | "ayarlar";
 
-const tabs: Array<{ id: Tab; label: string; Icon: typeof Inbox }> = [
+const allTabs: Array<{ id: Tab; label: string; Icon: typeof Inbox; developerOnly?: boolean }> = [
   { id: "ozet", label: "Özet", Icon: LayoutDashboard },
   { id: "basvurular", label: "Başvurular", Icon: Inbox },
+  // Yalnızca yazılımcıya görünür: yönetim ekibini düzenleme
+  { id: "ekip", label: "Ekip", Icon: Users, developerOnly: true },
   { id: "ayarlar", label: "Ayarlar", Icon: SettingsIcon },
 ];
 
@@ -46,9 +49,12 @@ export function AdminApp() {
   const [tab, setTab] = useState<Tab>(() => (initialSelection() ? "basvurular" : "ozet"));
   const [filter, setFilter] = useState<Filter>("all");
   const [notifyHint, setNotifyHint] = useState(false);
+  // Yazılımcı hâlâ kurulumun ürettiği geçici şifreyle mi giriyor?
+  const [temporaryPassword, setTemporaryPassword] = useState(false);
   const { toasts, toast, dismiss } = useToasts();
   const backendRef = useRef<Backend | null>(null);
   const userId = user?.id;
+  const developer = Boolean(user && canManageTeam(user));
 
   const openApplication = useCallback((id: string) => {
     setTab("basvurular");
@@ -100,6 +106,7 @@ export function AdminApp() {
   useEffect(() => {
     if (!backend || !userId) return;
     backend.listTeam().then(setTeam, () => setTeam([]));
+    if (developer) backend.manage.checkin().then(setTemporaryPassword, () => {});
     queueMicrotask(() => {
       setLoading(true);
       setNotifyHint(getNotificationState() === "default" || getNotificationState() === "needs-install");
@@ -120,7 +127,15 @@ export function AdminApp() {
       stop();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [backend, userId, refresh, toast, openApplication]);
+  }, [backend, userId, developer, refresh, toast, openApplication]);
+
+  // Yazılımcı ekibi değiştirdi: ekip listesini ve (kendi adını değiştirdiyse) oturumdaki kişiyi tazele
+  const teamChanged = useCallback(() => {
+    const b = backendRef.current;
+    if (!b) return;
+    b.listTeam().then(setTeam, () => {});
+    b.getUser().then((u) => u && setUser(u), () => {});
+  }, []);
 
   // Sekme değişince sayfanın başına dön (önceki sekmenin kaydırma konumu taşınmasın)
   useEffect(() => {
@@ -184,6 +199,7 @@ export function AdminApp() {
     setSelectedId(null);
     setTab("ozet");
     setTeam([]);
+    setTemporaryPassword(false);
     setUser(null);
   };
 
@@ -213,6 +229,7 @@ export function AdminApp() {
     );
   }
 
+  const tabs = allTabs.filter((t) => !t.developerOnly || developer);
   const title = tabs.find((t) => t.id === tab)?.label;
 
   return (
@@ -281,11 +298,24 @@ export function AdminApp() {
           />
         )}
         {tab === "basvurular" && <Applications apps={apps} team={team} me={user} loading={loading} filter={filter} onFilter={setFilter} selectedId={selectedId} onSelect={select} onUpdate={update} onRemove={remove} />}
+        {tab === "ekip" && developer && (
+          <TeamAdmin
+            backend={backend}
+            user={user}
+            temporaryPassword={temporaryPassword}
+            onChanged={teamChanged}
+            onNotice={(t, body, tone) => toast({ title: t, body, tone })}
+            onOpenSettings={() => setTab("ayarlar")}
+          />
+        )}
         {tab === "ayarlar" && (
           <Settings
             backend={backend}
             user={user}
             team={team}
+            temporaryPassword={temporaryPassword}
+            onPasswordChanged={() => setTemporaryPassword(false)}
+            onManageTeam={developer ? () => setTab("ekip") : undefined}
             onSignOut={signOut}
             onNotice={(t, body, tone) => toast({ title: t, body, tone })}
             onNotificationsChange={() => setNotifyHint(getNotificationState() === "default" || getNotificationState() === "needs-install")}
@@ -298,7 +328,7 @@ export function AdminApp() {
         className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink bg-paper px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 short:inset-y-0 short:right-auto short:flex short:w-[calc(env(safe-area-inset-left)+4.25rem)] short:flex-col short:justify-center short:border-r-2 short:border-t-0 short:px-1.5 short:pb-2 short:pl-[calc(env(safe-area-inset-left)+0.375rem)] lg:hidden"
         aria-label="Panel menüsü"
       >
-        <ul className="mx-auto grid max-w-md grid-cols-3 gap-1 short:mx-0 short:w-full short:grid-cols-1 short:gap-2">
+        <ul className={cn("mx-auto grid max-w-md gap-1 short:mx-0 short:w-full short:grid-cols-1", tabs.length > 3 ? "grid-cols-4 short:gap-1" : "grid-cols-3 short:gap-2")}>
           {tabs.map(({ id, label, Icon }) => (
             <li key={id}>
               <button

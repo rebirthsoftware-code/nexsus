@@ -5,7 +5,7 @@ import { ArrowRight, ChevronRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck
 import { Logo, LogoMark } from "@/components/Logo";
 import { Signature } from "@/components/Signature";
 import { cn } from "@/lib/utils";
-import { roleLabel, type AdminUser, type Backend } from "../types";
+import { roleLabel, rolePill, type AdminUser, type Backend } from "../types";
 import { Avatar } from "./ui";
 
 const inputCls =
@@ -71,7 +71,7 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
           {demo ? (
             <>
               <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] short:text-2xl">Kim giriyor?</h2>
-              <p className="mt-1 text-ink-soft">Panel demo modunda. Denemek için yönetim ekibinden birini seçin.</p>
+              <p className="mt-1 text-ink-soft">Panel demo modunda. Denemek için birini seçin.</p>
               <ul className="mt-5 space-y-2.5 short:mt-3 short:space-y-2">
                 {(backend.demoProfiles ?? []).map((p) => (
                   <li key={p.id}>
@@ -84,7 +84,7 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
                       <Avatar name={p.fullName} />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-display text-lg font-extrabold tracking-tight">{p.fullName}</span>
-                        <span className={cn("label-mono mt-0.5 inline-block rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", p.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[p.role]}</span>
+                        <span className={cn("label-mono mt-0.5 inline-block rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", rolePill[p.role])}>{roleLabel[p.role]}</span>
                       </span>
                       <ChevronRight className="h-5 w-5 shrink-0" />
                     </button>
@@ -123,7 +123,7 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
                 {busy ? "Giriş yapılıyor..." : "Giriş yap"}
                 {!busy && <ArrowRight className="h-5 w-5" />}
               </button>
-              <p className="mt-5 text-center text-xs text-ink-soft short:mt-3">Şifrenizi unuttuysanız kulüp başkanına ulaşın.</p>
+              <p className="mt-5 text-center text-xs text-ink-soft short:mt-3">Şifrenizi unuttuysanız sitenin yazılımcısına ulaşın.</p>
             </form>
           )}
 

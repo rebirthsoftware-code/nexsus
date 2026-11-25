@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, BellOff, BellRing, Check, Database, Download, LogOut, PlusCircle, RotateCcw, Share, Smartphone } from "lucide-react";
+import { Bell, BellOff, BellRing, Check, Database, Download, Eye, EyeOff, KeyRound, Loader2, LogOut, PlusCircle, RotateCcw, Share, Smartphone, TriangleAlert, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VAPID_PUBLIC_KEY, disableNotifications, enableNotifications, getNotificationState, hasPushSubscription, isIos, isStandalone, showNotification, type NotificationState } from "../push";
-import { roleLabel, type AdminUser, type Backend, type TeamMember } from "../types";
+import { MIN_PASSWORD, roleLabel, rolePill, type AdminUser, type Backend, type TeamMember } from "../types";
 import { Signature } from "@/components/Signature";
 import { Avatar, Card, CardTitle } from "./ui";
 
@@ -31,6 +31,9 @@ export function Settings({
   backend,
   user,
   team,
+  temporaryPassword,
+  onPasswordChanged,
+  onManageTeam,
   onSignOut,
   onNotice,
   onNotificationsChange,
@@ -38,6 +41,11 @@ export function Settings({
   backend: Backend;
   user: AdminUser;
   team: TeamMember[];
+  /** Yazılımcı hâlâ kurulumun ürettiği geçici şifreyi kullanıyor */
+  temporaryPassword: boolean;
+  onPasswordChanged: () => void;
+  /** Yalnızca yazılımcıda: ekip yönetimi bölümünü açar */
+  onManageTeam?: () => void;
   onSignOut: () => void;
   onNotice: (title: string, body?: string, tone?: "info" | "error") => void;
   onNotificationsChange: () => void;
@@ -47,6 +55,7 @@ export function Settings({
   const [busy, setBusy] = useState(false);
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [device, setDevice] = useState<{ ios: boolean; standalone: boolean } | null>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   useEffect(() => {
     // Cihaz bilgisi yalnızca tarayıcıda okunabilir; ilk çizimden sonra doldurulur
@@ -237,16 +246,38 @@ export function Settings({
           <div className="min-w-0 flex-1">
             <p className="font-display text-2xl font-extrabold leading-tight tracking-[-0.03em]">{user.fullName}</p>
             <p className="mt-1.5">
-              <span className={cn("label-mono rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[user.role]}</span>
+              <span className={cn("label-mono rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", rolePill[user.role])}>{roleLabel[user.role]}</span>
             </p>
             {user.email && <p className="mt-1 truncate text-sm text-ink-soft">{user.email}</p>}
           </div>
         </div>
+        {temporaryPassword && !passwordOpen && (
+          <p className="mt-4 flex items-start gap-2.5 rounded-xl border-2 border-ink bg-sun px-3.5 py-2.5 text-sm font-semibold leading-relaxed">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" /> Hâlâ kurulumun ürettiği geçici şifreyi kullanıyorsun. Kendi şifreni belirle.
+          </p>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
+          {backend.changePassword && !passwordOpen && (
+            <button type="button" onClick={() => setPasswordOpen(true)} className={cn(btn, temporaryPassword ? "bg-brand text-paper" : "bg-paper")}>
+              <KeyRound className="h-4 w-4" /> Şifre değiştir
+            </button>
+          )}
           <button type="button" onClick={onSignOut} className={cn(btn, "bg-paper")}>
             <LogOut className="h-4 w-4" /> Çıkış yap
           </button>
         </div>
+        {passwordOpen && (
+          <PasswordForm
+            backend={backend}
+            email={user.email}
+            onCancel={() => setPasswordOpen(false)}
+            onDone={() => {
+              setPasswordOpen(false);
+              onPasswordChanged();
+              onNotice("Şifren değişti", "Bir sonraki girişte yeni şifreni kullan.");
+            }}
+          />
+        )}
       </Card>
 
       <Card>
@@ -261,10 +292,18 @@ export function Settings({
                   {m.id === user.id && <span className="ml-2 font-sans text-xs font-semibold text-ink-soft">(siz)</span>}
                 </span>
               </span>
-              <span className={cn("label-mono shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", m.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[m.role]}</span>
+              <span className={cn("label-mono shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", rolePill[m.role])}>{roleLabel[m.role]}</span>
             </li>
           ))}
         </ul>
+        {team.length === 0 && <p className="py-2 text-sm text-ink-soft">Ekipte henüz kimse yok.</p>}
+        {onManageTeam && (
+          <div className="mt-3">
+            <button type="button" onClick={onManageTeam} className={cn(btn, "bg-brand text-paper")}>
+              <Users className="h-4 w-4" /> Ekibi düzenle
+            </button>
+          </div>
+        )}
         <p className="mt-3 text-xs leading-relaxed text-ink-soft">Panele yalnızca bu ekip girebilir: bir başkan ve iki başkan yardımcısı. Herkes başvuruları görür ve durumunu değiştirir; kalıcı silme yetkisi yalnızca başkandadır.</p>
       </Card>
 
@@ -273,5 +312,68 @@ export function Settings({
         <p className="label-mono text-[0.6rem] text-ink-soft">Nexus Yönetim Paneli</p>
       </footer>
     </div>
+  );
+}
+
+const fieldCls =
+  "w-full rounded-xl border-2 border-ink bg-white/70 px-3.5 py-2.5 text-base text-ink placeholder:text-ink/35 outline-none transition-all focus:bg-white focus:shadow-[4px_4px_0_0_var(--color-brand)] focus-visible:outline-none";
+
+/** Giriş yapan kişinin kendi şifresini değiştirdiği form */
+function PasswordForm({ backend, email, onCancel, onDone }: { backend: Backend; email: string; onCancel: () => void; onDone: () => void }) {
+  const [password, setPassword] = useState("");
+  const [repeat, setRepeat] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < MIN_PASSWORD) return setError(`Şifre en az ${MIN_PASSWORD} karakter olmalı.`);
+    if (password !== repeat) return setError("İki şifre aynı değil.");
+    setBusy(true);
+    setError("");
+    try {
+      await backend.changePassword?.(password);
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Şifre değiştirilemedi.");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} noValidate className="mt-4 space-y-3 border-t-2 border-ink/15 pt-4">
+      <p className="font-display font-extrabold tracking-tight">Yeni şifre belirle</p>
+      {/* Şifre yöneticileri hangi hesabın şifresinin değiştiğini buradan anlar */}
+      <input type="email" value={email} readOnly hidden autoComplete="username" />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-1.5 block font-display text-sm font-bold tracking-tight">Yeni şifre</span>
+          <span className="relative block">
+            <input type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={cn(fieldCls, "pr-12")} placeholder={`En az ${MIN_PASSWORD} karakter`} autoComplete="new-password" />
+            <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Şifreyi gizle" : "Şifreyi göster"} className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-ink-soft hover:bg-paper-deep">
+              {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </span>
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block font-display text-sm font-bold tracking-tight">Yeni şifre, tekrar</span>
+          <input type={show ? "text" : "password"} value={repeat} onChange={(e) => setRepeat(e.target.value)} className={fieldCls} autoComplete="new-password" />
+        </label>
+      </div>
+      {error && (
+        <p role="alert" className="rounded-xl border-2 border-ink bg-coral px-3.5 py-2 text-sm font-semibold">
+          {error}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={busy} className={cn(btn, "bg-brand text-paper")}>
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Şifreyi kaydet
+        </button>
+        <button type="button" onClick={onCancel} disabled={busy} className={cn(btn, "bg-paper")}>
+          Vazgeç
+        </button>
+      </div>
+    </form>
   );
 }

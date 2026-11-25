@@ -7,10 +7,13 @@
  *
  * - Veritabanı bağlı değilse hiçbir şey yapmaz (ör. GitHub Pages derlemesi).
  * - Şema dosyası değişmediyse tekrar uygulamaz.
+ * - Panelin "yazılımcı" hesabı yoksa açar. Yazılımcı, yönetim ekibini panelden ekleyip değiştirir.
+ *   Hesabın geçici şifresi yalnızca bu derleme günlüğüne yazılır (günlüğü yalnızca Vercel
+ *   projesinin sahibi görebilir) ve ilk girişten sonra panelden değiştirilir.
  * - Bir sorun çıkarsa siteyi yayından alıkoymaz; ne olduğunu derleme günlüğüne yazar.
  * - Bağlantı adresini ve şifreyi asla günlüğe yazmaz.
  */
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const log = (msg) => console.log(`[veritabanı] ${msg}`);
@@ -82,7 +85,7 @@ async function connect(connectionString) {
     client.on("error", () => {}); // kopan bağlantı derlemeyi düşürmesin
     try {
       await client.connect();
-      return { client, host: base.host, mode: attempt.label };
+      return { client, host: base.host, mode: attempt.label, secret: base.password };
     } catch (error) {
       lastError = error;
       await client.end().catch(() => {});
@@ -127,26 +130,170 @@ async function main() {
 
   const { client } = connection;
   try {
-    // Şema daha önce bu sürümle uygulandıysa tekrar çalıştırma (sürüm, tablo açıklamasında tutulur)
-    const { rows } = await client.query("select obj_description(to_regclass('public.applications')) as v");
-    if (rows[0]?.v === version) {
-      log("Tablolar güncel, değişiklik gerekmedi.");
-      return;
+    let ready = true;
+    try {
+      // Şema daha önce bu sürümle uygulandıysa tekrar çalıştırma (sürüm, tablo açıklamasında tutulur)
+      const { rows } = await client.query("select obj_description(to_regclass('public.applications')) as v");
+      if (rows[0]?.v === version) {
+        log("Tablolar güncel, değişiklik gerekmedi.");
+      } else {
+        const firstTime = rows[0]?.v == null;
+        // Tek sorguda gönderilir; PostgreSQL bunu tek işlem olarak çalıştırır: ya hepsi uygulanır ya hiçbiri
+        await client.query(`${schema}\ncomment on table public.applications is '${version}';`);
+        const check = await client.query(
+          "select count(*)::int as n from information_schema.tables where table_schema = 'public' and table_name in ('applications', 'admins', 'push_subscriptions')"
+        );
+        log(`${firstTime ? "Tablolar kuruldu" : "Tablolar güncellendi"} (${check.rows[0].n}/3 tablo hazır).`);
+      }
+    } catch (error) {
+      ready = false;
+      log(`UYARI: Tablolar kurulamadı: ${error.message}`);
+      log("Site yine de yayınlanacak. Şema, Supabase SQL Editor'den elle de çalıştırılabilir (supabase/schema.sql).");
     }
-    const firstTime = rows[0]?.v == null;
-    // Tek sorguda gönderilir; PostgreSQL bunu tek işlem olarak çalıştırır: ya hepsi uygulanır ya hiçbiri
-    await client.query(`${schema}\ncomment on table public.applications is '${version}';`);
-    const check = await client.query(
-      "select count(*)::int as n from information_schema.tables where table_schema = 'public' and table_name in ('applications', 'admins', 'push_subscriptions')"
-    );
-    log(`${firstTime ? "Tablolar kuruldu" : "Tablolar güncellendi"} (${check.rows[0].n}/3 tablo hazır).`);
-    const team = await client.query("select count(*)::int as n from public.admins");
-    if (team.rows[0].n === 0) log("Not: Yönetim ekibi henüz boş. Panele girebilmek için ekip üyeleri eklenmeli (bkz. docs/YONETIM-PANELI-KURULUM.md, 3. adım).");
-  } catch (error) {
-    log(`UYARI: Tablolar kurulamadı: ${error.message}`);
-    log("Site yine de yayınlanacak. Şema, Supabase SQL Editor'den elle de çalıştırılabilir (supabase/schema.sql).");
+    if (ready) {
+      try {
+        await ensureDeveloper(client, connection.secret);
+      } catch (error) {
+        log(`UYARI: Yazılımcı hesabı hazırlanamadı: ${error.message}`);
+      }
+    }
   } finally {
     await client.end().catch(() => {});
+  }
+}
+
+/**
+ * Okunması ve yazması kolay geçici şifre: karıştırılan harfler (0/O, 1/l/I) yok. Yaklaşık 80 bit.
+ *
+ * Şifre rastgele seçilmez; veritabanı bağlantı şifresinden türetilir. Böylece yazılımcı ilk kez
+ * girene kadar her derlemede AYNI geçici şifre yazılır (arada yeni bir yayın çıksa da geçerli kalır)
+ * ve şifrenin açık hali hiçbir yerde saklanmaz. Bağlantı şifresini bilmeyen biri türetemez.
+ */
+function temporaryPassword(secret, salt) {
+  const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+  let n = BigInt(`0x${createHmac("sha256", secret).update(`nexus-yazilimci-gecici-sifre:${salt}`).digest("hex")}`);
+  const chars = [];
+  for (let i = 0; i < 16; i++) {
+    chars.push(alphabet[Number(n % BigInt(alphabet.length))]);
+    n /= BigInt(alphabet.length);
+  }
+  return [0, 4, 8, 12].map((i) => chars.slice(i, i + 4).join("")).join("-");
+}
+
+const setting = async (client, key) => (await client.query("select value from nexus_private.settings where key = $1", [key])).rows[0]?.value ?? null;
+const setSetting = (client, key, value) =>
+  client.query("insert into nexus_private.settings (key, value) values ($1, $2) on conflict (key) do update set value = excluded.value, updated_at = now()", [key, value]);
+const clearSetting = (client, key) => client.query("delete from nexus_private.settings where key = $1", [key]);
+
+/**
+ * Panelin yazılımcı hesabını hazırlar.
+ *
+ * - Hesap yoksa açar. Giriş e-postası NEXUS_DEVELOPER_EMAIL ile değiştirilebilir (gerçek bir
+ *   posta kutusu olması gerekmez; hiçbir e-posta gönderilmez).
+ * - Şifre: NEXUS_DEVELOPER_PASSWORD tanımlıysa o kullanılır ve günlüğe YAZILMAZ. Tanımlı değilse
+ *   geçici bir şifre üretilip günlüğe yazılır; yazılımcı ilk kez girene kadar her derlemede aynı
+ *   şifre yeniden yazılır, girdikten sonra bir daha yazılmaz.
+ * - Şifre unutulursa: Vercel'de NEXUS_DEVELOPER_RESET değişkenine yeni bir değer (ör. bugünün tarihi)
+ *   yazıp yeniden yayınlamak yeni bir geçici şifre üretir. Aynı değer ikinci kez sıfırlamaz.
+ */
+async function ensureDeveloper(client, secret) {
+  const email = (process.env.NEXUS_DEVELOPER_EMAIL || "yazilimci@nexus.panel").trim().toLowerCase();
+  const chosen = process.env.NEXUS_DEVELOPER_PASSWORD || "";
+  const resetToken = (process.env.NEXUS_DEVELOPER_RESET || "").trim();
+
+  const existing = (
+    await client.query(
+      "select a.user_id, u.email::text as email from public.admins a join auth.users u on u.id = a.user_id where a.role = 'yazilimci' order by a.created_at limit 1"
+    )
+  ).rows[0];
+
+  let reason = null;
+  if (!existing) reason = "created";
+  else if (resetToken && resetToken !== (await setting(client, "developer_reset_token"))) reason = "reset";
+  else if ((await setting(client, "developer_first_login_pending")) === "1" && !chosen) reason = "pending";
+
+  if (!reason) {
+    const team = (await client.query("select count(*)::int as n from public.admins where role <> 'yazilimci'")).rows[0].n;
+    log(`Yazılımcı hesabı hazır. Yönetim ekibi: ${team}/3 kişi.`);
+    return;
+  }
+  if (chosen && chosen.length < 8) {
+    log("UYARI: NEXUS_DEVELOPER_PASSWORD en az 8 karakter olmalı; yazılımcı hesabı bu derlemede değiştirilmedi.");
+    return;
+  }
+
+  // Sıfırlama isteği yoksa önceki sıfırlamanın değeri kullanılır: geçici şifre derlemeler arasında değişmez
+  const salt = resetToken || (await setting(client, "developer_reset_token")) || "";
+  let login = existing?.email || email;
+  let password = chosen;
+  await client.query("begin");
+  try {
+    if (existing) {
+      password ||= temporaryPassword(secret, `${existing.user_id}:${salt}`);
+      await client.query("select nexus_private.set_password($1, $2)", [existing.user_id, password]);
+    } else {
+      const user = (await client.query("select id from auth.users where lower(email) = $1", [email])).rows[0];
+      let id = user?.id;
+      if (!id) id = (await client.query("select nexus_private.create_account($1, $2) as id", [email, `${temporaryPassword(secret, "ilk")}-x`])).rows[0].id;
+      password ||= temporaryPassword(secret, `${id}:${salt}`);
+      await client.query("select nexus_private.set_password($1, $2)", [id, password]);
+      await client.query("insert into public.admins (user_id, full_name, role) values ($1, $2, 'yazilimci')", [id, (process.env.NEXUS_DEVELOPER_NAME || "Rebirth Software").trim().slice(0, 80) || "Yazılımcı"]);
+      login = email;
+    }
+    if (chosen) {
+      await clearSetting(client, "developer_first_login_pending");
+      await clearSetting(client, "developer_temp_password");
+    } else {
+      await setSetting(client, "developer_first_login_pending", "1");
+      await setSetting(client, "developer_temp_password", "1");
+    }
+    if (resetToken) await setSetting(client, "developer_reset_token", resetToken);
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback").catch(() => {});
+    throw error;
+  }
+
+  // Açılan hesapla gerçekten giriş yapılabiliyor mu? (Sonuç gizli bilgi içermez; dışarıdan da okunabilir.)
+  const test = await loginSelfTest(login, password);
+  await setSetting(client, "account_selftest", test);
+  const title = reason === "created" ? "PANELİN YAZILIMCI HESABI AÇILDI" : reason === "reset" ? "YAZILIMCI ŞİFRESİ SIFIRLANDI" : "YAZILIMCI HESABI İLK GİRİŞİ BEKLİYOR";
+  const lines = [
+    "",
+    "==================================================================",
+    `  ${title}`,
+    "",
+    `  Giriş e-postası : ${login}`,
+    chosen ? "  Şifre           : NEXUS_DEVELOPER_PASSWORD değişkenindeki şifre" : `  Geçici şifre    : ${password}`,
+    "",
+    "  Panele (/admin) bu bilgilerle gir. \"Ekip yönetimi\" bölümünden başkanı ve",
+    "  başkan yardımcılarını ekle.",
+    ...(chosen ? [] : ["  İlk girişten sonra Ayarlar bölümünden kendi şifreni belirle.", "  Sen panele girene kadar bu bilgi her yayında buraya yeniden yazılır; girdikten sonra yazılmaz."]),
+    test === "ok" ? "  Giriş denemesi  : başarılı" : test === "skipped" ? "  Giriş denemesi  : atlandı (Supabase adresi bu derlemede tanımlı değil)" : `  Giriş denemesi  : BAŞARISIZ (${test})`,
+    "==================================================================",
+    "",
+  ];
+  for (const line of lines) console.log(line ? `[veritabanı] ${line}` : "");
+}
+
+/** Supabase giriş servisine gerçek bir şifreli giriş dener; sonucu kısa bir kodla döndürür. */
+async function loginSelfTest(email, password) {
+  const env = process.env;
+  const base = (env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || "").replace(/\/+$/, "");
+  const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY || "";
+  if (!base || !key) return "skipped";
+  try {
+    const response = await fetch(`${base}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { apikey: key, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (response.ok) return "ok";
+    const body = await response.json().catch(() => ({}));
+    return `failed:${response.status}:${String(body.error_code || body.code || body.error || "").slice(0, 40)}`;
+  } catch (error) {
+    return `failed:network:${String(error.name || "").slice(0, 30)}`;
   }
 }
 

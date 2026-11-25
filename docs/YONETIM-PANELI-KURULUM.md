@@ -26,7 +26,9 @@ Yeniden yayın sırasında iki şey olur:
 - Site veritabanına bağlanır: başvuru formu kayıtları oraya yazar, `/admin` gerçek girişe geçer.
 - `scripts/setup-db.mjs` betiği `supabase/schema.sql` dosyasını veritabanına uygular. Sonucu yayının **Build Logs** kısmında `[veritabanı]` ile başlayan satırlarda görürsün: "Tablolar kuruldu (3/3 tablo hazır)".
 
-Geriye yalnızca yönetim ekibini eklemek kalır: Vercel'deki veritabanı sayfasından **Open in Supabase** ile paneli aç ve aşağıdaki **3. adımı** uygula.
+- Betik panelin **yazılımcı hesabını** açar ve giriş bilgilerini aynı günlüğe yazar ("PANELİN YAZILIMCI HESABI AÇILDI"). Bu günlüğü yalnızca Vercel projesinin sahibi görebilir.
+
+Geriye yalnızca yönetim ekibini eklemek kalır. Bunun için SQL gerekmez: günlükteki bilgilerle `/admin` adresinden gir ve **Ekip** bölümünü kullan (bkz. **3. adım**).
 
 Notlar:
 
@@ -52,37 +54,52 @@ Bu adım başvuru tablosunu ve erişim kurallarını oluşturur: ziyaretçiler y
 
 Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes kendi hesabıyla girer ve girişte adıyla karşılanır ("Hoş geldiniz, Ahmet Bey"). "Bey / Hanım" hitabı yalnızca bu karşılamada kullanılır; panelin diğer yerlerinde kişi adı soyadıyla görünür.
 
-1. **Authentication → Users → Add user → Create new user** ile her kişi için e-posta ve şifre gir. "Auto Confirm User" işaretli olsun. (Üç kişi için üç kez.)
-2. **SQL Editor**'de aşağıdaki komutu kendi bilgilerinizle çalıştır. Her satırda sırasıyla **ad soyad**, **görev**, **hitap** ve o kişinin **e-postası** yazıyor:
+Ekibi, sitenin **yazılımcısı** panelin içinden yönetir. SQL yazmak gerekmez.
 
-   ```sql
-   insert into public.admins (user_id, full_name, role, honorific)
-   select id, 'Ahmet Yılmaz', 'baskan', 'Bey' from auth.users where email = 'baskan@ornek.com';
+### Yazılımcı hesabı
 
-   insert into public.admins (user_id, full_name, role, honorific)
-   select id, 'Elif Demir', 'baskan_yardimcisi', 'Hanım' from auth.users where email = 'yardimci1@ornek.com';
+Yazılımcı hesabı kendiliğinden açılır: site veritabanına bağlı olarak derlendiğinde `scripts/setup-db.mjs` hesabı oluşturur ve giriş bilgilerini derleme günlüğüne yazar.
 
-   insert into public.admins (user_id, full_name, role, honorific)
-   select id, 'Mert Kaya', 'baskan_yardimcisi', 'Bey' from auth.users where email = 'yardimci2@ornek.com';
+1. Vercel'de **Deployments → son yayın → Build Logs** bölümünü aç ve `[veritabanı]` ile başlayan satırları bul:
+
+   ```
+   [veritabanı]   PANELİN YAZILIMCI HESABI AÇILDI
+   [veritabanı]   Giriş e-postası : yazilimci@nexus.panel
+   [veritabanı]   Geçici şifre    : xxxx-xxxx-xxxx-xxxx
+   [veritabanı]   Giriş denemesi  : başarılı
    ```
 
-   | Alan | Yazılabilecek değerler |
-   | --- | --- |
-   | Görev | `baskan` ya da `baskan_yardimcisi` |
-   | Hitap (yalnızca karşılamada kullanılır) | `Bey` ya da `Hanım` |
+2. Sitenin `/admin` adresinden bu bilgilerle gir.
+3. **Ayarlar → Şifre değiştir** ile kendi şifreni belirle. Geçici şifre o andan sonra çalışmaz.
 
-Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir; dördüncü kişi eklenmeye çalışılırsa komut hata verir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez.
+Sen panele girene kadar aynı geçici şifre her yayının günlüğüne yeniden yazılır; girdikten sonra bir daha yazılmaz. Şifrenin açık hali hiçbir yerde saklanmaz.
 
-**Yetkiler:** Üç kişi de başvuruları görür, arar, durumunu ve notunu değiştirir. Bir başvuruyu **kalıcı olarak silmek yalnızca başkana** açıktır; bu kural da veritabanında tanımlıdır.
+İsteğe bağlı Vercel ortam değişkenleri (**Settings → Environment Variables**):
+
+| Değişken | Ne işe yarar |
+| --- | --- |
+| `NEXUS_DEVELOPER_EMAIL` | Yazılımcı hesabının giriş e-postası. Gerçek bir posta kutusu olması gerekmez; hiçbir e-posta gönderilmez. Yalnızca hesap ilk açılırken okunur. |
+| `NEXUS_DEVELOPER_PASSWORD` | Şifreyi kendin belirlersin (en az 8 karakter). Bu durumda şifre günlüğe **yazılmaz**. |
+| `NEXUS_DEVELOPER_RESET` | Şifreni unutursan: bu değişkene yeni bir değer yaz (ör. bugünün tarihi) ve yeniden yayınla. Günlüğe yeni bir geçici şifre yazılır. Aynı değer ikinci kez sıfırlamaz. |
+
+### Ekibi ekle ve değiştir
+
+Yazılımcı hesabıyla girince menüde **Ekip** bölümü görünür. Bu bölümü yalnızca yazılımcı görür; başkan ve başkan yardımcılarının menüsünde yoktur.
+
+- **Ekle:** boş koltuktaki "Başkan ekle" ya da "Başkan Yardımcısı ekle" düğmesine bas. Ad soyadı, hitabı (Bey / Hanım), giriş e-postasını ve şifreyi gir. Şifreyi "Üret" düğmesi senin yerine üretir. Kayıttan sonra giriş bilgileri bir kez gösterilir; kişiye sen iletirsin.
+- **Düzenle:** adı, hitabı ve görevi değiştirir. Birini başkan yaptığında o anki başkan kendiliğinden başkan yardımcısı olur.
+- **Şifre yenile:** şifresini unutan kişiye yeni şifre verir.
+- **Kaldır:** kişiyi ekipten çıkarır ve giriş hesabını siler. Başvurular silinmez.
+
+Her yönetici kendi şifresini **Ayarlar → Şifre değiştir** ile değiştirebilir.
+
+Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez. Ekibi düzenleyen fonksiyonları yalnızca yazılımcı çağırabilir; panel arayüzü atlansa bile başka hiç kimse ekibi değiştiremez. Yazılımcı hesabı yöneticilere görünmez.
+
+**Yetkiler:** Üç yönetici de başvuruları görür, arar, durumunu ve notunu değiştirir. Bir başvuruyu **kalıcı olarak silmek yalnızca başkana** (ve yazılımcıya) açıktır; bu kural da veritabanında tanımlıdır.
 
 Panel ayrıca her başvurunun durumunu **kimin** değiştirdiğini gösterir ("Durumu Elif Demir güncelledi"). Bu bilgiyi veritabanı kendisi kaydeder; elle değiştirilemez.
 
-**Birini değiştirmek için** (ör. yeni dönemde başkan değişti): eski kişiyi **Authentication → Users** bölümünden sil (ekip kaydı da silinir), yeni kişiyi 1. ve 2. adımla ekle. Yalnızca adı ya da hitabı düzeltmek için:
-
-```sql
-update public.admins set full_name = 'Yeni Ad Soyad', honorific = 'Hanım'
-where user_id = (select id from auth.users where email = 'kisi@ornek.com');
-```
+> Vercel dışında bir yayın kullanıyorsan (ör. yalnızca GitHub Pages), yazılımcı hesabını açmak için bilgisayarında bir kez `POSTGRES_URL="<Supabase bağlantı adresi>" npm run veritabani` çalıştır. Giriş bilgileri terminale yazılır.
 
 **Önerilir:** **Authentication → Sign In / Providers** altında "Allow new users to sign up" seçeneğini kapat. Böylece kimse kendi kendine hesap açamaz.
 
@@ -173,8 +190,10 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 | Belirti | Olası neden |
 | --- | --- |
 | Panel hâlâ "Demo modu" diyor | Vercel'de: veritabanı projeye bağlanmamış ya da bağlandıktan sonra Redeploy yapılmamış. GitHub Pages'te: `src/admin/config.ts` içindeki iki değer boş |
-| "Bu hesabın yönetim paneli yetkisi yok" | Hesap yönetim ekibine (`admins` tablosu) eklenmemiş: 3. adımdaki SQL |
-| "Yalnızca bir başkan olabilir" hatası | Ekipte zaten bir başkan var; önce eskisini sil ya da görevini değiştir |
+| "Bu hesabın yönetim paneli yetkisi yok" | Hesap yönetim ekibinde değil. Yazılımcı, paneldeki **Ekip** bölümünden ekler |
+| "Yalnızca bir başkan olabilir" hatası | Ekipte zaten bir başkan var. Yeni başkanı yardımcı olarak ekleyip **Düzenle** ile başkan yap ya da önce eskisini kaldır |
+| Günlükte "Giriş denemesi : BAŞARISIZ" yazıyor | Yazılımcı hesabı açıldı ama giriş servisi kabul etmedi. Parantez içindeki kodu not et; hesap Supabase'de **Authentication → Users** bölümünden elle de açılabilir |
+| Yazılımcı şifresi unutuldu | Vercel'de `NEXUS_DEVELOPER_RESET` değişkenine yeni bir değer yazıp yeniden yayınla (bkz. 3. adım) |
 | Form "kaydedilemedi" diyor | `schema.sql` çalıştırılmamış ya da anon anahtarı yanlış kopyalanmış |
 | Bildirim gelmiyor | 5. adımdaki dört parçadan biri eksik. Supabase'de **Edge Functions → Logs** fonksiyonun çağrılıp çağrılmadığını gösterir |
 | iPhone'da bildirim seçeneği yok | Uygulama ana ekrana eklenmemiş, Safari sekmesinde açılmış |
@@ -182,7 +201,8 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 ## Güvenlik ve kişisel veriler
 
 - Başvurular ad, telefon ve e-posta içerir. Panele yalnızca yönetim ekibi (başkan ve iki yardımcısı) girebilir.
-- Görevi biten kişiyi **Authentication → Users** bölümünden sil; ekip kaydı da kendiliğinden silinir.
+- Görevi biten kişiyi paneldeki **Ekip** bölümünden kaldır; giriş hesabı da silinir.
+- Yazılımcı hesabının geçici şifresi yalnızca Vercel derleme günlüğüne yazılır. İlk girişte kendi şifreni belirle.
 - Herkes kendi hesabını kullansın; şifre paylaşılırsa "kim işlem yaptı" kaydı anlamını yitirir.
 - İşi biten başvuruları panelden silebilir, dönem sonunda **Excel** düğmesiyle yedek alabilirsin.
 
@@ -190,7 +210,8 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 
 Depodaki kod yerelde şu şekilde sınandı:
 
-- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; ekipte olmayan hesap hiçbir kaydı göremiyor; ekip bir başkan ve iki yardımcıyla sınırlı; silme yalnızca başkanda (arayüz atlansa bile); "kim işlem yaptı" kaydı sahtelenemiyor.
+- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; ekipte olmayan hesap hiçbir kaydı göremiyor; ekip bir başkan ve iki yardımcıyla sınırlı; silme yalnızca başkanda (arayüz atlansa bile); "kim işlem yaptı" kaydı sahtelenemiyor; ekibi yalnızca yazılımcı değiştirebiliyor ve yöneticiler yazılımcı hesabını göremiyor.
+- Yazılımcı bölümü tarayıcıda: geçici şifreyle giriş, yönetici ekleme, düzenleme, görev değişimi, şifre yenileme, kaldırma, şifre değiştirme; telefon, yatay ve dar ekran düzeni.
 - Form → veritabanı → panel akışı tarayıcıda: üç ayrı hesapla giriş ve kişiye özel karşılama, yetkisiz hesap, durum ve not değişikliği, silme.
 - Bildirim şifrelemesi bağımsız kütüphanelerle; uygulamanın bildirimi gösterip doğru başvuruya yönlendirmesi tarayıcıda.
 

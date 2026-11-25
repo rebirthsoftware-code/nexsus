@@ -23,7 +23,7 @@ export function daysBetween(a: string, b: string) {
 
 /**
  * public/ klasöründeki bir dosyanın adresi. Site bir alt yolda yayınlandığında
- * (GitHub Pages: /nexsus) düz <img>/<video> yollarına bu alt yol elle eklenmelidir.
+ * (GitHub Pages: /depo-adı) düz <img>/<video> yollarına bu alt yol elle eklenmelidir.
  */
 export function asset(path: string) {
   return `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path.startsWith("/") ? path : `/${path}`}`;
