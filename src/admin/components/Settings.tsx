@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Bell, BellOff, BellRing, Check, Database, Download, LogOut, PlusCircle, RotateCcw, Share, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VAPID_PUBLIC_KEY, disableNotifications, enableNotifications, getNotificationState, hasPushSubscription, isIos, isStandalone, showNotification, type NotificationState } from "../push";
-import { addressName, roleLabel, type AdminUser, type Backend, type TeamMember } from "../types";
+import { roleLabel, type AdminUser, type Backend, type TeamMember } from "../types";
 import { Avatar, Card, CardTitle } from "./ui";
 
 /** Chrome ve Edge'in "uygulamayı yükle" penceresini açan olay */
@@ -234,10 +234,9 @@ export function Settings({
         <div className="flex items-center gap-4">
           <Avatar name={user.fullName} className="h-16 w-16 text-xl" />
           <div className="min-w-0 flex-1">
-            <p className="font-display text-2xl font-extrabold leading-tight tracking-[-0.03em]">{addressName(user)}</p>
-            <p className="mt-1 flex flex-wrap items-center gap-2">
+            <p className="font-display text-2xl font-extrabold leading-tight tracking-[-0.03em]">{user.fullName}</p>
+            <p className="mt-1.5">
               <span className={cn("label-mono rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[user.role]}</span>
-              <span className="truncate text-sm text-ink-soft">{user.fullName}</span>
             </p>
             {user.email && <p className="mt-1 truncate text-sm text-ink-soft">{user.email}</p>}
           </div>
@@ -257,10 +256,9 @@ export function Settings({
               <Avatar name={m.fullName} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display font-extrabold tracking-tight">
-                  {addressName(m)}
+                  {m.fullName}
                   {m.id === user.id && <span className="ml-2 font-sans text-xs font-semibold text-ink-soft">(siz)</span>}
                 </span>
-                <span className="block truncate text-sm text-ink-soft">{m.fullName}</span>
               </span>
               <span className={cn("label-mono shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", m.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[m.role]}</span>
             </li>

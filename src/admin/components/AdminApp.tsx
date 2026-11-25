@@ -6,7 +6,7 @@ import { Logo, LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import { loadBackend } from "../backend";
 import { getNotificationState, registerServiceWorker, setBadge, showNotification } from "../push";
-import { addressName, roleLabel, type AdminUser, type Application, type ApplicationPatch, type Backend, type TeamMember } from "../types";
+import { roleLabel, type AdminUser, type Application, type ApplicationPatch, type Backend, type TeamMember } from "../types";
 import { Applications, type Filter } from "./Applications";
 import { Login } from "./Login";
 import { Overview } from "./Overview";
@@ -243,7 +243,7 @@ export function AdminApp() {
         <div className="flex items-center gap-2.5 border-t-2 border-paper/20 pt-4">
           <Avatar name={user.fullName} className="h-10 w-10 border-paper text-xs" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-display font-extrabold tracking-tight">{addressName(user)}</span>
+            <span className="block truncate font-display font-extrabold tracking-tight">{user.fullName}</span>
             <span className="label-mono block truncate text-[0.6rem] text-paper/60">{roleLabel[user.role]}</span>
           </span>
           <button type="button" onClick={signOut} aria-label="Çıkış yap" className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 border-paper/40 hover:bg-paper hover:text-navy">
@@ -260,7 +260,7 @@ export function AdminApp() {
         </span>
         <span className="flex shrink-0 items-center gap-2">
           {backend.mode === "demo" && <span className="label-mono rounded-full border-2 border-ink bg-sun px-2.5 py-1 text-[0.62rem] text-ink">Demo</span>}
-          <button type="button" onClick={() => setTab("ayarlar")} aria-label={`${addressName(user)}, ${roleLabel[user.role]}. Ayarları aç`}>
+          <button type="button" onClick={() => setTab("ayarlar")} aria-label={`${user.fullName}, ${roleLabel[user.role]}. Ayarları aç`}>
             <Avatar name={user.fullName} className="h-9 w-9 border-paper text-xs" />
           </button>
         </span>

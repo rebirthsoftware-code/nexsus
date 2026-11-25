@@ -28,7 +28,7 @@ Bu adım başvuru tablosunu ve erişim kurallarını oluşturur: ziyaretçiler y
 
 ## 3. Yönetim ekibini oluştur
 
-Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes kendi hesabıyla girer ve adıyla karşılanır ("Hoş geldiniz, Ahmet Bey").
+Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes kendi hesabıyla girer ve girişte adıyla karşılanır ("Hoş geldiniz, Ahmet Bey"). "Bey / Hanım" hitabı yalnızca bu karşılamada kullanılır; panelin diğer yerlerinde kişi adı soyadıyla görünür.
 
 1. **Authentication → Users → Add user → Create new user** ile her kişi için e-posta ve şifre gir. "Auto Confirm User" işaretli olsun. (Üç kişi için üç kez.)
 2. **SQL Editor**'de aşağıdaki komutu kendi bilgilerinizle çalıştır. Her satırda sırasıyla **ad soyad**, **görev**, **hitap** ve o kişinin **e-postası** yazıyor:
@@ -47,13 +47,13 @@ Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes
    | Alan | Yazılabilecek değerler |
    | --- | --- |
    | Görev | `baskan` ya da `baskan_yardimcisi` |
-   | Hitap | `Bey` ya da `Hanım` |
+   | Hitap (yalnızca karşılamada kullanılır) | `Bey` ya da `Hanım` |
 
 Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir; dördüncü kişi eklenmeye çalışılırsa komut hata verir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez.
 
 **Yetkiler:** Üç kişi de başvuruları görür, arar, durumunu ve notunu değiştirir. Bir başvuruyu **kalıcı olarak silmek yalnızca başkana** açıktır; bu kural da veritabanında tanımlıdır.
 
-Panel ayrıca her başvurunun durumunu **kimin** değiştirdiğini gösterir ("Durumu Elif Hanım güncelledi"). Bu bilgiyi veritabanı kendisi kaydeder; elle değiştirilemez.
+Panel ayrıca her başvurunun durumunu **kimin** değiştirdiğini gösterir ("Durumu Elif Demir güncelledi"). Bu bilgiyi veritabanı kendisi kaydeder; elle değiştirilemez.
 
 **Birini değiştirmek için** (ör. yeni dönemde başkan değişti): eski kişiyi **Authentication → Users** bölümünden sil (ekip kaydı da silinir), yeni kişiyi 1. ve 2. adımla ekle. Yalnızca adı ya da hitabı düzeltmek için:
 

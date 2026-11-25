@@ -43,7 +43,7 @@ export type TeamMember = {
   id: string;
   fullName: string;
   role: Role;
-  /** Karşılamada kullanılan hitap: "Ahmet Bey", "Elif Hanım" */
+  /** Yalnızca karşılamada kullanılan hitap: "Hoş geldiniz, Ahmet Bey" */
   honorific: Honorific;
 };
 
@@ -58,7 +58,11 @@ export const canDelete = (person: Pick<TeamMember, "role">) => person.role === "
 
 export const DELETE_DENIED = "Başvuruyu yalnızca başkan silebilir.";
 
-/** "Ahmet Yılmaz" + "Bey" → "Ahmet Bey" (iki adı olanlarda: "Ali Kemal Bey") */
+/**
+ * Karşılama hitabı: "Ahmet Yılmaz" + "Bey" → "Ahmet Bey" (iki adı olanlarda: "Ali Kemal Bey").
+ * YALNIZCA karşılamada kullanılır (giriş sonrası ekran ve özet sayfasındaki selam).
+ * Panelin diğer yerlerinde kişi düz adı soyadıyla (fullName) görünür.
+ */
 export function addressName(person: Pick<TeamMember, "fullName" | "honorific">) {
   const parts = person.fullName.trim().split(/\s+/).filter(Boolean);
   const given = parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArrowRight, ChevronRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Logo, LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
-import { addressName, roleLabel, type AdminUser, type Backend } from "../types";
+import { roleLabel, type AdminUser, type Backend } from "../types";
 import { Avatar } from "./ui";
 
 const inputCls =
@@ -79,7 +79,7 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
                     >
                       <Avatar name={p.fullName} />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-display text-lg font-extrabold tracking-tight">{addressName(p)}</span>
+                        <span className="block truncate font-display text-lg font-extrabold tracking-tight">{p.fullName}</span>
                         <span className={cn("label-mono mt-0.5 inline-block rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", p.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[p.role]}</span>
                       </span>
                       <ChevronRight className="h-5 w-5 shrink-0" />
@@ -88,7 +88,7 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
                 ))}
               </ul>
               <p className="mt-5 rounded-xl border-2 border-dashed border-ink/40 p-3 text-xs leading-relaxed text-ink-soft short:mt-3">
-                İsimler örnektir. Veritabanı bağlandığında bu ekranın yerini e-posta ve şifreyle giriş alır; herkes kendi adıyla karşılanır.
+                İsimler örnektir. Veritabanı bağlandığında bu ekranın yerini e-posta ve şifreyle giriş alır; herkes girişte kendi adıyla karşılanır.
               </p>
             </>
           ) : (

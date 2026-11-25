@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Check, Download, Inbox, Lock, Mail, MessageCircle, Phone, Search, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { downloadFile, fullDate, timeAgo, toCsv, whatsappLink } from "../format";
-import { addressName, canDelete, DELETE_DENIED, statusMeta, statusOrder, type AdminUser, type Application, type ApplicationPatch, type Status, type TeamMember } from "../types";
+import { canDelete, DELETE_DENIED, statusMeta, statusOrder, type AdminUser, type Application, type ApplicationPatch, type Status, type TeamMember } from "../types";
 import { Avatar, StatusPill } from "./ui";
 
 export type Filter = "all" | Status;
@@ -305,7 +305,7 @@ function Detail({
             <p className="mt-2.5 text-sm text-ink-soft">
               {handler ? (
                 <>
-                  Durumu <strong className="text-ink">{handler.id === me.id ? "siz" : addressName(handler)}</strong> güncelledi{handler.id === me.id ? "niz" : ""}
+                  Durumu <strong className="text-ink">{handler.id === me.id ? "siz" : handler.fullName}</strong> güncelledi{handler.id === me.id ? "niz" : ""}
                 </>
               ) : (
                 "Durum güncellendi"
