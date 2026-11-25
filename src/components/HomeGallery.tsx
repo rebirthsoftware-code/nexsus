@@ -9,10 +9,16 @@ const teasers = ["Stant günü", "Atölye", "Gezi", "Söyleşi"];
 // Kareler hafifçe üst üste biner ve farklı yüksekliklerde durur
 const offsets = ["sm:mt-6", "sm:-mt-2", "sm:mt-10", "sm:mt-1"];
 
-/** Ana sayfadaki "Sizden Kalanlar" önizlemesi: en yeni dört kare ya da henüz fotoğraf yoksa boş çerçeveler. */
+/**
+ * Ana sayfadaki "Sizden Kalanlar" önizlemesi: dört kare ya da henüz fotoğraf yoksa boş çerçeveler.
+ * Kareler albümlerden sırayla seçilir (her albümün ilk karesi, sonra ikincileri...), böylece
+ * tek bir etkinlik önizlemeyi doldurmaz.
+ */
 export function HomeGallery() {
-  const latest = getAlbums()
-    .flatMap((album) => album.photos.map((photo) => ({ photo, album })))
+  const albums = getAlbums();
+  const longest = Math.max(0, ...albums.map((album) => album.photos.length));
+  const latest = Array.from({ length: longest }, (_, i) => albums.filter((album) => album.photos[i]).map((album) => ({ photo: album.photos[i], album })))
+    .flat()
     .slice(0, 4);
 
   return (
