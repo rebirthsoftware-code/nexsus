@@ -26,11 +26,36 @@ export type Application = {
   adminNote: string | null;
   /** Panelde açılıp görüldü mü */
   seen: boolean;
+  /** Durumu en son değiştiren yöneticinin kimliği ve zamanı */
+  handledBy: string | null;
+  handledAt: string | null;
 };
 
 export type ApplicationPatch = Partial<Pick<Application, "status" | "adminNote" | "seen">>;
 
-export type AdminUser = { email: string };
+export type Role = "baskan" | "baskan_yardimcisi";
+export type Honorific = "Bey" | "Hanım";
+
+export const roleLabel: Record<Role, string> = { baskan: "Başkan", baskan_yardimcisi: "Başkan Yardımcısı" };
+
+/** Yönetim ekibinden bir kişi. Panel üç kişiliktir: bir başkan ve iki başkan yardımcısı. */
+export type TeamMember = {
+  id: string;
+  fullName: string;
+  role: Role;
+  /** Karşılamada kullanılan hitap: "Ahmet Bey", "Elif Hanım" */
+  honorific: Honorific;
+};
+
+/** Giriş yapmış yönetici */
+export type AdminUser = TeamMember & { email: string };
+
+/** "Ahmet Yılmaz" + "Bey" → "Ahmet Bey" (iki adı olanlarda: "Ali Kemal Bey") */
+export function addressName(person: Pick<TeamMember, "fullName" | "honorific">) {
+  const parts = person.fullName.trim().split(/\s+/).filter(Boolean);
+  const given = parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
+  return `${given} ${person.honorific}`.trim();
+}
 
 export type BackendEvent = { type: "insert"; application: Application } | { type: "refresh" };
 
@@ -44,6 +69,10 @@ export interface Backend {
   getUser(): Promise<AdminUser | null>;
   signIn(email: string, password: string): Promise<AdminUser>;
   signOut(): Promise<void>;
+  /** Yönetim ekibi (başkan önce) */
+  listTeam(): Promise<TeamMember[]>;
+  /** Yalnızca demo: giriş ekranında seçilebilen örnek yöneticiler */
+  demoProfiles?: AdminUser[];
   list(): Promise<Application[]>;
   update(id: string, patch: ApplicationPatch): Promise<void>;
   remove(id: string): Promise<void>;

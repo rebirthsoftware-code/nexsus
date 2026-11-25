@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { AdminUser, Application, ApplicationPatch, Backend, Status } from "./types";
+import type { AdminUser, Application, ApplicationPatch, Backend, Honorific, Role, Status, TeamMember } from "./types";
 
 /** Veritabanındaki satır (bkz. supabase/schema.sql) */
 type Row = {
@@ -16,7 +16,13 @@ type Row = {
   status: Status;
   admin_note: string | null;
   seen: boolean;
+  handled_by: string | null;
+  handled_at: string | null;
 };
+
+type AdminRow = { user_id: string; full_name: string; role: Role; honorific: Honorific };
+
+const toMember = (r: AdminRow): TeamMember => ({ id: r.user_id, fullName: r.full_name, role: r.role, honorific: r.honorific });
 
 function toApplication(r: Row): Application {
   return {
@@ -33,6 +39,8 @@ function toApplication(r: Row): Application {
     status: r.status,
     adminNote: r.admin_note,
     seen: r.seen,
+    handledBy: r.handled_by,
+    handledAt: r.handled_at,
   };
 }
 
@@ -56,31 +64,41 @@ export function createSupabaseBackend(url: string, anonKey: string): Backend {
     auth: { persistSession: true, autoRefreshToken: true, storageKey: "nexus-panel-oturum" },
   });
 
-  /** Giriş yapan hesap yönetici listesinde mi? (RLS, kişiye yalnızca kendi satırını gösterir) */
-  async function requireAdmin(email: string): Promise<AdminUser> {
-    const { data, error } = await sb.from("admins").select("user_id").limit(1);
+  /**
+   * Giriş yapan hesap yönetim ekibinde mi? Ekipteyse adını, görevini ve hitabını getirir.
+   * (RLS: ekipte olmayan bir hesap bu tablodan hiçbir satır göremez.)
+   */
+  async function requireAdmin(userId: string, email: string): Promise<AdminUser> {
+    const { data, error } = await sb.from("admins").select("user_id,full_name,role,honorific").eq("user_id", userId).limit(1);
     if (error) throw new Error("Yetki kontrol edilemedi. Bağlantını kontrol edip tekrar dene.");
-    if (!data?.length) {
+    const row = (data as AdminRow[] | null)?.[0];
+    if (!row) {
       await sb.auth.signOut();
       throw new Error(NOT_ADMIN);
     }
-    return { email };
+    return { ...toMember(row), email };
   }
 
   return {
     mode: "supabase",
     async getUser() {
       const { data } = await sb.auth.getSession();
-      const email = data.session?.user.email;
-      if (!email) return null;
-      return requireAdmin(email);
+      const user = data.session?.user;
+      if (!user) return null;
+      return requireAdmin(user.id, user.email ?? "");
     },
     async signIn(email, password) {
       const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
       if (error || !data.user) {
         throw new Error(error?.message === "Invalid login credentials" ? "E-posta ya da şifre hatalı." : "Giriş yapılamadı. Biraz sonra tekrar dene.");
       }
-      return requireAdmin(data.user.email ?? email);
+      return requireAdmin(data.user.id, data.user.email ?? email);
+    },
+    async listTeam() {
+      const { data, error } = await sb.from("admins").select("user_id,full_name,role,honorific");
+      if (error) return [];
+      // Başkan en üstte, sonra ada göre
+      return (data as AdminRow[]).map(toMember).sort((a, b) => Number(b.role === "baskan") - Number(a.role === "baskan") || a.fullName.localeCompare(b.fullName, "tr"));
     },
     async signOut() {
       await sb.auth.signOut();

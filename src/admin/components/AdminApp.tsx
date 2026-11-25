@@ -6,12 +6,13 @@ import { Logo, LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import { loadBackend } from "../backend";
 import { getNotificationState, registerServiceWorker, setBadge, showNotification } from "../push";
-import type { Application, ApplicationPatch, Backend } from "../types";
+import { addressName, roleLabel, type AdminUser, type Application, type ApplicationPatch, type Backend, type TeamMember } from "../types";
 import { Applications, type Filter } from "./Applications";
 import { Login } from "./Login";
 import { Overview } from "./Overview";
 import { Settings } from "./Settings";
-import { Toasts, useToasts } from "./ui";
+import { Avatar, Toasts, useToasts } from "./ui";
+import { Welcome } from "./Welcome";
 
 type Tab = "ozet" | "basvurular" | "ayarlar";
 
@@ -34,7 +35,11 @@ function initialSelection() {
 export function AdminApp() {
   const [backend, setBackend] = useState<Backend | null>(null);
   // undefined: oturum kontrol ediliyor · null: giriş yapılmamış
-  const [userEmail, setUserEmail] = useState<string | null | undefined>(undefined);
+  const [user, setUser] = useState<AdminUser | null | undefined>(undefined);
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  // Yalnızca yeni giriş yapıldığında gösterilen karşılama ekranı
+  const [welcome, setWelcome] = useState(false);
+  const closeWelcome = useCallback(() => setWelcome(false), []);
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(initialSelection);
@@ -43,6 +48,7 @@ export function AdminApp() {
   const [notifyHint, setNotifyHint] = useState(false);
   const { toasts, toast, dismiss } = useToasts();
   const backendRef = useRef<Backend | null>(null);
+  const userId = user?.id;
 
   const openApplication = useCallback((id: string) => {
     setTab("basvurular");
@@ -58,11 +64,11 @@ export function AdminApp() {
       backendRef.current = b;
       setBackend(b);
       try {
-        const user = await b.getUser();
-        if (alive) setUserEmail(user?.email ?? null);
+        const current = await b.getUser();
+        if (alive) setUser(current);
       } catch (e) {
         if (!alive) return;
-        setUserEmail(null);
+        setUser(null);
         toast({ title: "Oturum açılamadı", body: e instanceof Error ? e.message : undefined, tone: "error" });
       }
     });
@@ -92,7 +98,8 @@ export function AdminApp() {
 
   // Giriş yapılınca: başvuruları getir ve yeni kayıtları dinle
   useEffect(() => {
-    if (!backend || !userEmail) return;
+    if (!backend || !userId) return;
+    backend.listTeam().then(setTeam, () => setTeam([]));
     queueMicrotask(() => {
       setLoading(true);
       setNotifyHint(getNotificationState() === "default" || getNotificationState() === "needs-install");
@@ -113,16 +120,23 @@ export function AdminApp() {
       stop();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [backend, userEmail, refresh, toast, openApplication]);
+  }, [backend, userId, refresh, toast, openApplication]);
+
+  // Sekme değişince sayfanın başına dön (önceki sekmenin kaydırma konumu taşınmasın)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [tab]);
 
   const newCount = apps.filter((a) => a.status === "new").length;
   useEffect(() => {
-    if (userEmail) setBadge(newCount);
-  }, [newCount, userEmail]);
+    if (userId) setBadge(newCount);
+  }, [newCount, userId]);
 
   const update = useCallback(
     (id: string, patch: ApplicationPatch) => {
-      setApps((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+      // Durum değişikliğinde "kim, ne zaman" bilgisini ekranda hemen göster (kalıcı kayıt arka uçta tutulur)
+      const stamp = patch.status ? { handledBy: userId ?? null, handledAt: new Date().toISOString() } : {};
+      setApps((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch, ...stamp } : a)));
       backendRef.current?.update(id, patch).catch((e) => {
         toast({ title: "Kaydedilemedi", body: e instanceof Error ? e.message : undefined, tone: "error" });
         refresh();
@@ -130,7 +144,7 @@ export function AdminApp() {
       if (patch.status) toast({ title: "Durum güncellendi" });
       if (patch.adminNote !== undefined) toast({ title: "Not kaydedildi" });
     },
-    [toast, refresh]
+    [toast, refresh, userId]
   );
 
   const remove = useCallback(
@@ -169,10 +183,11 @@ export function AdminApp() {
     setApps([]);
     setSelectedId(null);
     setTab("ozet");
-    setUserEmail(null);
+    setTeam([]);
+    setUser(null);
   };
 
-  if (!backend || userEmail === undefined) {
+  if (!backend || user === undefined) {
     return (
       <div className="grid min-h-dvh place-items-center bg-navy text-paper">
         <div className="flex flex-col items-center gap-5">
@@ -183,11 +198,17 @@ export function AdminApp() {
     );
   }
 
-  if (!userEmail) {
+  if (!user) {
     return (
       <>
         <Toasts toasts={toasts} dismiss={dismiss} />
-        <Login backend={backend} onSignedIn={setUserEmail} />
+        <Login
+          backend={backend}
+          onSignedIn={(u) => {
+            setWelcome(true);
+            setUser(u);
+          }}
+        />
       </>
     );
   }
@@ -195,8 +216,9 @@ export function AdminApp() {
   const title = tabs.find((t) => t.id === tab)?.label;
 
   return (
-    <div className="min-h-dvh bg-paper lg:pl-64">
+    <div className="min-h-dvh bg-paper max-lg:short:pl-[calc(env(safe-area-inset-left)+4.25rem)] lg:pl-64">
       <Toasts toasts={toasts} dismiss={dismiss} />
+      {welcome && <Welcome user={user} onDone={closeWelcome} />}
 
       {/* Geniş ekran: sol menü */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r-2 border-ink bg-navy p-5 text-paper lg:flex">
@@ -218,8 +240,12 @@ export function AdminApp() {
           ))}
         </nav>
         {backend.mode === "demo" && <p className="label-mono mb-3 rounded-lg border-2 border-ink bg-sun px-2.5 py-1.5 text-center text-ink">Demo modu</p>}
-        <div className="flex items-center gap-2 border-t-2 border-paper/20 pt-4">
-          <span className="min-w-0 flex-1 truncate text-sm text-paper/80">{userEmail}</span>
+        <div className="flex items-center gap-2.5 border-t-2 border-paper/20 pt-4">
+          <Avatar name={user.fullName} className="h-10 w-10 border-paper text-xs" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate font-display font-extrabold tracking-tight">{addressName(user)}</span>
+            <span className="label-mono block truncate text-[0.6rem] text-paper/60">{roleLabel[user.role]}</span>
+          </span>
           <button type="button" onClick={signOut} aria-label="Çıkış yap" className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 border-paper/40 hover:bg-paper hover:text-navy">
             <LogOut className="h-4 w-4" />
           </button>
@@ -227,19 +253,24 @@ export function AdminApp() {
       </aside>
 
       {/* Telefon: üst çubuk */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b-2 border-ink bg-navy px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] text-paper lg:hidden">
-        <span className="flex items-center gap-2.5">
-          <LogoMark light className="h-7 w-auto" />
-          <span className="font-display text-lg font-extrabold tracking-tight">{title}</span>
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b-2 border-ink bg-navy px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] text-paper short:hidden lg:hidden">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <LogoMark light className="h-7 w-auto shrink-0" />
+          <span className="truncate font-display text-lg font-extrabold tracking-tight">{title}</span>
         </span>
-        {backend.mode === "demo" && <span className="label-mono rounded-full border-2 border-ink bg-sun px-2.5 py-1 text-[0.62rem] text-ink">Demo</span>}
+        <span className="flex shrink-0 items-center gap-2">
+          {backend.mode === "demo" && <span className="label-mono rounded-full border-2 border-ink bg-sun px-2.5 py-1 text-[0.62rem] text-ink">Demo</span>}
+          <button type="button" onClick={() => setTab("ayarlar")} aria-label={`${addressName(user)}, ${roleLabel[user.role]}. Ayarları aç`}>
+            <Avatar name={user.fullName} className="h-9 w-9 border-paper text-xs" />
+          </button>
+        </span>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">
+      <main className="mx-auto w-full max-w-6xl px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-5 sm:px-6 max-lg:short:pb-6 max-lg:short:pr-[calc(env(safe-area-inset-right)+1rem)] lg:px-8 lg:pb-12 lg:pt-8">
         {tab === "ozet" && (
           <Overview
             apps={apps}
-            userEmail={userEmail}
+            user={user}
             showNotifyHint={notifyHint}
             onOpen={openApplication}
             onSeeAll={(status) => {
@@ -249,11 +280,12 @@ export function AdminApp() {
             onOpenSettings={() => setTab("ayarlar")}
           />
         )}
-        {tab === "basvurular" && <Applications apps={apps} loading={loading} filter={filter} onFilter={setFilter} selectedId={selectedId} onSelect={select} onUpdate={update} onRemove={remove} />}
+        {tab === "basvurular" && <Applications apps={apps} team={team} me={user} loading={loading} filter={filter} onFilter={setFilter} selectedId={selectedId} onSelect={select} onUpdate={update} onRemove={remove} />}
         {tab === "ayarlar" && (
           <Settings
             backend={backend}
-            userEmail={userEmail}
+            user={user}
+            team={team}
             onSignOut={signOut}
             onNotice={(t, body, tone) => toast({ title: t, body, tone })}
             onNotificationsChange={() => setNotifyHint(getNotificationState() === "default" || getNotificationState() === "needs-install")}
@@ -262,8 +294,11 @@ export function AdminApp() {
       </main>
 
       {/* Telefon: alt sekme çubuğu */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink bg-paper px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 lg:hidden" aria-label="Panel menüsü">
-        <ul className="mx-auto grid max-w-md grid-cols-3 gap-1">
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-ink bg-paper px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 short:inset-y-0 short:right-auto short:flex short:w-[calc(env(safe-area-inset-left)+4.25rem)] short:flex-col short:justify-center short:border-r-2 short:border-t-0 short:px-1.5 short:pb-2 short:pl-[calc(env(safe-area-inset-left)+0.375rem)] lg:hidden"
+        aria-label="Panel menüsü"
+      >
+        <ul className="mx-auto grid max-w-md grid-cols-3 gap-1 short:mx-0 short:w-full short:grid-cols-1 short:gap-2">
           {tabs.map(({ id, label, Icon }) => (
             <li key={id}>
               <button

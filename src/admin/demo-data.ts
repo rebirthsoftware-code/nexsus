@@ -1,4 +1,14 @@
-import type { Application, Status } from "./types";
+import type { AdminUser, Application, Status } from "./types";
+
+/**
+ * Demo modunda giriş ekranında seçilebilen kurgusal yönetim ekibi.
+ * Gerçek kurulumda ekip veritabanındaki "admins" tablosundan gelir.
+ */
+export const demoTeam: AdminUser[] = [
+  { id: "demo-baskan", fullName: "Ahmet Yılmaz", role: "baskan", honorific: "Bey", email: "ahmet@ornek.edu.tr" },
+  { id: "demo-yardimci-1", fullName: "Elif Demir", role: "baskan_yardimcisi", honorific: "Hanım", email: "elif@ornek.edu.tr" },
+  { id: "demo-yardimci-2", fullName: "Mert Kaya", role: "baskan_yardimcisi", honorific: "Bey", email: "mert@ornek.edu.tr" },
+];
 
 /** Demo modunda gösterilen kurgusal başvurular. Gerçek kişilerle ilgisi yoktur. */
 const people: Array<[string, string, string, string[], Status, number, string | null]> = [
@@ -54,6 +64,8 @@ export function seedApplications(now = Date.now()): Application[] {
     status,
     adminNote: status === "pending" ? "Öğrenci belgesi bekleniyor." : null,
     seen: status !== "new",
+    handledBy: status === "new" ? null : demoTeam[i % demoTeam.length].id,
+    handledAt: status === "new" ? null : new Date(now - Math.max(0.2, hoursAgo - 6) * 3_600_000).toISOString(),
   }));
 }
 
@@ -72,5 +84,7 @@ export function randomApplication(index: number, now = Date.now()): Application 
     status: "new",
     adminNote: null,
     seen: false,
+    handledBy: null,
+    handledAt: null,
   };
 }

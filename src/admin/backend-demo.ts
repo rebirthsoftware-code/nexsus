@@ -1,7 +1,7 @@
-import { randomApplication, seedApplications } from "./demo-data";
+import { demoTeam, randomApplication, seedApplications } from "./demo-data";
 import type { AdminUser, Application, Backend, BackendEvent } from "./types";
 
-const DATA_KEY = "nexus-panel-demo-veri-v1";
+const DATA_KEY = "nexus-panel-demo-veri-v2";
 const USER_KEY = "nexus-panel-demo-oturum";
 
 function read(): Application[] {
@@ -26,30 +26,39 @@ function write(list: Application[]) {
 
 /**
  * Demo arka ucu: veriler bu tarayıcıda saklanır, hiçbir sunucuya gitmez.
- * Paneli kurulum yapmadan denemek içindir; her e-posta ve şifreyle giriş yapılabilir.
+ * Paneli kurulum yapmadan denemek içindir; giriş ekranında örnek yöneticilerden biri seçilir.
  */
+function currentUser(): AdminUser | null {
+  try {
+    const id = localStorage.getItem(USER_KEY);
+    return demoTeam.find((m) => m.id === id) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function createDemoBackend(): Backend {
   const listeners = new Set<(event: BackendEvent) => void>();
   let simulated = 0;
 
   return {
     mode: "demo",
+    demoProfiles: demoTeam,
     async getUser() {
-      try {
-        const email = localStorage.getItem(USER_KEY);
-        return email ? { email } : null;
-      } catch {
-        return null;
-      }
+      return currentUser();
     },
-    async signIn(email): Promise<AdminUser> {
-      const user = { email: email.trim() || "demo@nexus" };
+    /** Demo: "e-posta" yerine seçilen örnek yöneticinin kimliği gelir */
+    async signIn(profileId): Promise<AdminUser> {
+      const user = demoTeam.find((m) => m.id === profileId) ?? demoTeam[0];
       try {
-        localStorage.setItem(USER_KEY, user.email);
+        localStorage.setItem(USER_KEY, user.id);
       } catch {
         /* yoksay */
       }
       return user;
+    },
+    async listTeam() {
+      return demoTeam;
     },
     async signOut() {
       try {
@@ -62,7 +71,9 @@ export function createDemoBackend(): Backend {
       return read().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     },
     async update(id, patch) {
-      write(read().map((a) => (a.id === id ? { ...a, ...patch } : a)));
+      // Durum değişirse kimin, ne zaman değiştirdiği kaydedilir (gerçek kurulumda bunu veritabanı yapar)
+      const stamp = patch.status ? { handledBy: currentUser()?.id ?? null, handledAt: new Date().toISOString() } : {};
+      write(read().map((a) => (a.id === id ? { ...a, ...patch, ...stamp } : a)));
     },
     async remove(id) {
       write(read().filter((a) => a.id !== id));

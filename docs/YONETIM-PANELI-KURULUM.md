@@ -26,17 +26,39 @@ Veritabanı olarak [Supabase](https://supabase.com) kullanılır: ücretsiz katm
 
 Bu adım başvuru tablosunu ve erişim kurallarını oluşturur: ziyaretçiler yalnızca başvuru **ekleyebilir**, başvuruları yalnızca yöneticiler **okuyabilir**.
 
-## 3. Yönetici hesabı oluştur
+## 3. Yönetim ekibini oluştur
 
-1. **Authentication → Users → Add user → Create new user** ile e-posta ve şifre gir. "Auto Confirm User" işaretli olsun.
-2. **SQL Editor**'de şu komutu kendi e-postanla çalıştır:
+Panel üç kişiliktir: **bir başkan** ve **iki başkan yardımcısı**. Herkes kendi hesabıyla girer ve adıyla karşılanır ("Hoş geldiniz, Ahmet Bey").
+
+1. **Authentication → Users → Add user → Create new user** ile her kişi için e-posta ve şifre gir. "Auto Confirm User" işaretli olsun. (Üç kişi için üç kez.)
+2. **SQL Editor**'de aşağıdaki komutu kendi bilgilerinizle çalıştır. Her satırda sırasıyla **ad soyad**, **görev**, **hitap** ve o kişinin **e-postası** yazıyor:
 
    ```sql
-   insert into public.admins (user_id)
-   select id from auth.users where email = 'senin@epostan.com';
+   insert into public.admins (user_id, full_name, role, honorific)
+   select id, 'Ahmet Yılmaz', 'baskan', 'Bey' from auth.users where email = 'baskan@ornek.com';
+
+   insert into public.admins (user_id, full_name, role, honorific)
+   select id, 'Elif Demir', 'baskan_yardimcisi', 'Hanım' from auth.users where email = 'yardimci1@ornek.com';
+
+   insert into public.admins (user_id, full_name, role, honorific)
+   select id, 'Mert Kaya', 'baskan_yardimcisi', 'Bey' from auth.users where email = 'yardimci2@ornek.com';
    ```
 
-Her yeni yönetici için bu iki adımı tekrarla. Yönetici listesinde olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez.
+   | Alan | Yazılabilecek değerler |
+   | --- | --- |
+   | Görev | `baskan` ya da `baskan_yardimcisi` |
+   | Hitap | `Bey` ya da `Hanım` |
+
+Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir; dördüncü kişi eklenmeye çalışılırsa komut hata verir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez.
+
+Panel ayrıca her başvurunun durumunu **kimin** değiştirdiğini gösterir ("Durumu Elif Hanım güncelledi"). Bu bilgiyi veritabanı kendisi kaydeder; elle değiştirilemez.
+
+**Birini değiştirmek için** (ör. yeni dönemde başkan değişti): eski kişiyi **Authentication → Users** bölümünden sil (ekip kaydı da silinir), yeni kişiyi 1. ve 2. adımla ekle. Yalnızca adı ya da hitabı düzeltmek için:
+
+```sql
+update public.admins set full_name = 'Yeni Ad Soyad', honorific = 'Hanım'
+where user_id = (select id from auth.users where email = 'kisi@ornek.com');
+```
 
 **Önerilir:** **Authentication → Sign In / Providers** altında "Allow new users to sign up" seçeneğini kapat. Böylece kimse kendi kendine hesap açamaz.
 
@@ -125,23 +147,25 @@ Panelde **Ayarlar → Bildirimleri aç**. Her yönetici bunu kendi cihazında bi
 | Belirti | Olası neden |
 | --- | --- |
 | Panel hâlâ "Demo modu" diyor | GitHub değişkenleri eksik ya da site değişkenlerden sonra yeniden yayınlanmadı |
-| "Bu hesabın yönetim paneli yetkisi yok" | Hesap `admins` tablosuna eklenmemiş (3. adımdaki SQL) |
+| "Bu hesabın yönetim paneli yetkisi yok" | Hesap yönetim ekibine (`admins` tablosu) eklenmemiş: 3. adımdaki SQL |
+| "Yalnızca bir başkan olabilir" hatası | Ekipte zaten bir başkan var; önce eskisini sil ya da görevini değiştir |
 | Form "kaydedilemedi" diyor | `schema.sql` çalıştırılmamış ya da anon anahtarı yanlış kopyalanmış |
 | Bildirim gelmiyor | 5. adımdaki dört parçadan biri eksik. Supabase'de **Edge Functions → Logs** fonksiyonun çağrılıp çağrılmadığını gösterir |
 | iPhone'da bildirim seçeneği yok | Uygulama ana ekrana eklenmemiş, Safari sekmesinde açılmış |
 
 ## Güvenlik ve kişisel veriler
 
-- Başvurular ad, telefon ve e-posta içerir. Panele yalnızca gerçekten ihtiyacı olan kişileri yönetici yap.
-- Ayrılan bir yöneticiyi **Authentication → Users** bölümünden sil; `admins` kaydı da kendiliğinden silinir.
+- Başvurular ad, telefon ve e-posta içerir. Panele yalnızca yönetim ekibi (başkan ve iki yardımcısı) girebilir.
+- Görevi biten kişiyi **Authentication → Users** bölümünden sil; ekip kaydı da kendiliğinden silinir.
+- Herkes kendi hesabını kullansın; şifre paylaşılırsa "kim işlem yaptı" kaydı anlamını yitirir.
 - İşi biten başvuruları panelden silebilir, dönem sonunda **Excel** düğmesiyle yedek alabilirsin.
 
 ## Neler test edildi
 
 Depodaki kod yerelde şu şekilde sınandı:
 
-- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; yönetici olmayan hesap hiçbir kaydı göremiyor.
-- Form → veritabanı → panel akışı tarayıcıda: giriş, yanlış şifre, yetkisiz hesap, durum ve not değişikliği, silme.
+- Erişim kuralları gerçek PostgreSQL üzerinde: ziyaretçi yalnızca ekleyebiliyor; ekipte olmayan hesap hiçbir kaydı göremiyor; ekip bir başkan ve iki yardımcıyla sınırlı; "kim işlem yaptı" kaydı sahtelenemiyor.
+- Form → veritabanı → panel akışı tarayıcıda: üç ayrı hesapla giriş ve kişiye özel karşılama, yetkisiz hesap, durum ve not değişikliği, silme.
 - Bildirim şifrelemesi bağımsız kütüphanelerle; uygulamanın bildirimi gösterip doğru başvuruya yönlendirmesi tarayıcıda.
 
 Gerçek bir Supabase projesiyle (hesaplı giriş servisi, anlık güncelleme ve telefona gerçek bildirim teslimi) henüz denenmedi. Kurulumdan sonra bir deneme başvurusu göndererek doğrulayın.

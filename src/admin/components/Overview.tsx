@@ -4,7 +4,7 @@ import { BellRing, ChevronRight, Inbox } from "lucide-react";
 import { attractions as attractionOptions } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import { dayKey, timeAgo } from "../format";
-import type { Application } from "../types";
+import { addressName, roleLabel, type AdminUser, type Application } from "../types";
 import { Avatar, Card, CardTitle, StatusPill } from "./ui";
 
 const DAYS = 14;
@@ -12,14 +12,14 @@ const DAYS = 14;
 /** Özet sekmesi: sayılar, son iki haftanın grafiği ve başvuranların ilgi alanları. */
 export function Overview({
   apps,
-  userEmail,
+  user,
   showNotifyHint,
   onOpen,
   onSeeAll,
   onOpenSettings,
 }: {
   apps: Application[];
-  userEmail: string;
+  user: AdminUser;
   showNotifyHint: boolean;
   onOpen: (id: string) => void;
   onSeeAll: (status?: "new") => void;
@@ -62,8 +62,13 @@ export function Overview({
   return (
     <div className="space-y-5">
       <header>
-        <p className="label-mono text-ink-soft">{userEmail}</p>
-        <h1 className="display-tight mt-1 text-4xl sm:text-5xl">{greeting}.</h1>
+        <p className="label-mono inline-flex items-center gap-2 text-ink-soft">
+          <span className={cn("rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun text-ink")}>{roleLabel[user.role]}</span>
+          Nexus yönetim paneli
+        </p>
+        <h1 className="display-tight mt-2 text-4xl sm:text-5xl">
+          {greeting}, {addressName(user).replace(` ${user.honorific}`, "")} <span className="font-serif font-normal italic tracking-[-0.02em] text-brand">{user.honorific}</span>.
+        </h1>
         <p className="mt-2 text-ink-soft">
           {counts.fresh > 0 ? (
             <>
@@ -109,7 +114,7 @@ export function Overview({
         })}
       </dl>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card className="flex flex-col">
           <CardTitle aside={<span className="label-mono text-ink-soft">Son {DAYS} gün</span>}>Günlük başvurular</CardTitle>
           <div className="flex min-h-36 flex-1 items-end gap-1.5" role="img" aria-label={`Son ${DAYS} günde toplam ${days.reduce((s, d) => s + d.count, 0)} başvuru`}>
@@ -147,7 +152,7 @@ export function Overview({
         </Card>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardTitle
             aside={

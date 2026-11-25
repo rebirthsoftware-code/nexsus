@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Bell, BellOff, BellRing, Check, Database, Download, LogOut, PlusCircle, RotateCcw, Share, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VAPID_PUBLIC_KEY, disableNotifications, enableNotifications, getNotificationState, hasPushSubscription, isIos, isStandalone, showNotification, type NotificationState } from "../push";
-import type { Backend } from "../types";
-import { Card, CardTitle } from "./ui";
+import { addressName, roleLabel, type AdminUser, type Backend, type TeamMember } from "../types";
+import { Avatar, Card, CardTitle } from "./ui";
 
 /** Chrome ve Edge'in "uygulamayı yükle" penceresini açan olay */
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
@@ -28,13 +28,15 @@ const btn = "pressable inline-flex items-center gap-2 rounded-full border-2 bord
 /** Ayarlar sekmesi: bildirimler, uygulamayı yükleme, hesap ve bağlantı durumu. */
 export function Settings({
   backend,
-  userEmail,
+  user,
+  team,
   onSignOut,
   onNotice,
   onNotificationsChange,
 }: {
   backend: Backend;
-  userEmail: string;
+  user: AdminUser;
+  team: TeamMember[];
   onSignOut: () => void;
   onNotice: (title: string, body?: string, tone?: "info" | "error") => void;
   onNotificationsChange: () => void;
@@ -228,12 +230,43 @@ export function Settings({
       </Card>
 
       <Card>
-        <CardTitle>Hesap</CardTitle>
-        <Row icon={<span className="font-display font-extrabold">{userEmail.slice(0, 1).toLocaleUpperCase("tr-TR")}</span>} title={userEmail} text="Bu cihazda oturumun açık.">
+        <CardTitle>Hesabım</CardTitle>
+        <div className="flex items-center gap-4">
+          <Avatar name={user.fullName} className="h-16 w-16 text-xl" />
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-2xl font-extrabold leading-tight tracking-[-0.03em]">{addressName(user)}</p>
+            <p className="mt-1 flex flex-wrap items-center gap-2">
+              <span className={cn("label-mono rounded-full border-2 border-ink px-2 py-0.5 text-[0.62rem]", user.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[user.role]}</span>
+              <span className="truncate text-sm text-ink-soft">{user.fullName}</span>
+            </p>
+            {user.email && <p className="mt-1 truncate text-sm text-ink-soft">{user.email}</p>}
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" onClick={onSignOut} className={cn(btn, "bg-paper")}>
             <LogOut className="h-4 w-4" /> Çıkış yap
           </button>
-        </Row>
+        </div>
+      </Card>
+
+      <Card>
+        <CardTitle aside={<span className="label-mono text-ink-soft">{team.length} kişi</span>}>Yönetim ekibi</CardTitle>
+        <ul className="divide-y-2 divide-ink/10">
+          {team.map((m) => (
+            <li key={m.id} className="flex items-center gap-3 py-2.5">
+              <Avatar name={m.fullName} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-display font-extrabold tracking-tight">
+                  {addressName(m)}
+                  {m.id === user.id && <span className="ml-2 font-sans text-xs font-semibold text-ink-soft">(siz)</span>}
+                </span>
+                <span className="block truncate text-sm text-ink-soft">{m.fullName}</span>
+              </span>
+              <span className={cn("label-mono shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-[0.6rem]", m.role === "baskan" ? "bg-brand text-paper" : "bg-sun")}>{roleLabel[m.role]}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs leading-relaxed text-ink-soft">Panele yalnızca bu ekip girebilir: bir başkan ve iki başkan yardımcısı.</p>
       </Card>
     </div>
   );

@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Check, Download, Inbox, Mail, MessageCircle, Phone, Search, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { downloadFile, fullDate, timeAgo, toCsv, whatsappLink } from "../format";
-import { statusMeta, statusOrder, type Application, type ApplicationPatch, type Status } from "../types";
+import { addressName, statusMeta, statusOrder, type AdminUser, type Application, type ApplicationPatch, type Status, type TeamMember } from "../types";
 import { Avatar, StatusPill } from "./ui";
 
 export type Filter = "all" | Status;
@@ -27,6 +27,8 @@ const filterLabels: Record<Filter, string> = { all: "Tümü", new: "Yeni", pendi
 /** Başvurular sekmesi: arama, durum filtresi, liste ve seçilen başvurunun ayrıntısı. */
 export function Applications({
   apps,
+  team,
+  me,
   loading,
   filter,
   onFilter,
@@ -36,6 +38,8 @@ export function Applications({
   onRemove,
 }: {
   apps: Application[];
+  team: TeamMember[];
+  me: AdminUser;
   loading: boolean;
   filter: Filter;
   onFilter: (f: Filter) => void;
@@ -157,7 +161,7 @@ export function Applications({
       {wide && (
         <div className="sticky top-6 max-h-[calc(100dvh-3rem)] self-start overflow-y-auto rounded-3xl pb-2 pr-2">
           {selected ? (
-            <Detail key={selected.id} app={selected} onClose={() => onSelect(null)} onUpdate={onUpdate} onRemove={onRemove} />
+            <Detail key={selected.id} app={selected} team={team} me={me} onClose={() => onSelect(null)} onUpdate={onUpdate} onRemove={onRemove} />
           ) : (
             <p className="flex min-h-[24rem] flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-ink/40 p-10 text-center text-ink-soft">
               <Inbox className="h-10 w-10" />
@@ -168,7 +172,7 @@ export function Applications({
       )}
       {!wide && selected && (
         <div className="animate-[slide-in_0.28s_cubic-bezier(0.2,0.8,0.2,1)_both] fixed inset-0 z-50 overflow-y-auto bg-paper">
-          <Detail key={selected.id} app={selected} mobile onClose={() => onSelect(null)} onUpdate={onUpdate} onRemove={onRemove} />
+          <Detail key={selected.id} app={selected} team={team} me={me} mobile onClose={() => onSelect(null)} onUpdate={onUpdate} onRemove={onRemove} />
         </div>
       )}
       <style>{`@keyframes slide-in { from { transform: translateX(100%); } to { transform: none; } }`}</style>
@@ -178,12 +182,16 @@ export function Applications({
 
 function Detail({
   app,
+  team,
+  me,
   mobile = false,
   onClose,
   onUpdate,
   onRemove,
 }: {
   app: Application;
+  team: TeamMember[];
+  me: AdminUser;
   mobile?: boolean;
   onClose: () => void;
   onUpdate: (id: string, patch: ApplicationPatch) => void;
@@ -193,6 +201,8 @@ function Detail({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const noteChanged = note.trim() !== (app.adminNote ?? "");
   const firstName = app.fullName.split(" ")[0];
+  // Durumu en son kim değiştirdi?
+  const handler = app.handledBy ? (app.handledBy === me.id ? me : team.find((m) => m.id === app.handledBy)) : null;
 
   const info: Array<[string, string]> = [
     ["Bölüm", app.department],
@@ -291,6 +301,18 @@ function Detail({
               );
             })}
           </div>
+          {app.handledAt && app.status !== "new" && (
+            <p className="mt-2.5 text-sm text-ink-soft">
+              {handler ? (
+                <>
+                  Durumu <strong className="text-ink">{handler.id === me.id ? "siz" : addressName(handler)}</strong> güncelledi{handler.id === me.id ? "niz" : ""}
+                </>
+              ) : (
+                "Durum güncellendi"
+              )}{" "}
+              · {timeAgo(app.handledAt)}
+            </p>
+          )}
         </div>
 
         <div>

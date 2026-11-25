@@ -20,7 +20,7 @@ export function Avatar({ name, className }: { name: string; className?: string }
 }
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <section className={cn("rounded-3xl border-2 border-ink bg-paper p-5 shadow-hard-sm sm:p-6", className)}>{children}</section>;
+  return <section className={cn("min-w-0 rounded-3xl border-2 border-ink bg-paper p-5 shadow-hard-sm sm:p-6", className)}>{children}</section>;
 }
 
 export function CardTitle({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
