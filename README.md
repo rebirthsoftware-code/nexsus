@@ -73,7 +73,7 @@ Site tamamen statik olarak üretilir (`npm run build` → `out/` klasörü) ve G
 
 ### Vercel
 
-Depo Vercel'e bağlanırsa ek ayar gerekmez: site kök adreste yayınlanır ve yayın adresi kendiliğinden algılanır. Veritabanı Vercel'in Supabase eklentisiyle eklenirse bağlantı değerleri de kendiliğinden tanımlanır (bkz. kurulum rehberi). Etkinlik ve duyurulardaki gün sayaçları tarayıcıda hesaplandığı için yeniden derleme gerekmeden güncel kalır.
+Depo Vercel'e bağlanırsa ek ayar gerekmez: site kök adreste yayınlanır ve yayın adresi kendiliğinden algılanır. Veritabanı Vercel'in Supabase eklentisiyle eklenirse bağlantı değerleri kendiliğinden tanımlanır ve tablolar derleme sırasında `scripts/setup-db.mjs` ile kendiliğinden kurulur (bkz. kurulum rehberi). Etkinlik ve duyurulardaki gün sayaçları tarayıcıda hesaplandığı için yeniden derleme gerekmeden güncel kalır.
 
 ### Önizleme modu
 
@@ -100,6 +100,7 @@ Teknik yapı:
 | Veri katmanı (demo ve Supabase) | `src/admin/backend*.ts` |
 | Bildirim ve uygulama yükleme | `src/admin/push.ts`, `public/admin-sw.js`, `src/app/admin/manifest.webmanifest/` |
 | Veritabanı şeması ve erişim kuralları | `supabase/schema.sql` |
+| Tabloları derleme sırasında kuran betik | `scripts/setup-db.mjs` |
 | Bildirim gönderen sunucu fonksiyonu | `supabase/functions/yeni-basvuru-bildirimi/` |
 
 ## Duyurular

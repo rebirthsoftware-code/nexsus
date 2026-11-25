@@ -16,15 +16,23 @@ Veritabanı olarak [Supabase](https://supabase.com) kullanılır: ücretsiz katm
 
 ## Site Vercel'de yayınlanıyorsa: kısa yol
 
-Vercel, Supabase veritabanını kendi panelinden ekleyebilir ve bağlantı değerlerini projeye kendiliğinden tanımlar. Bu durumda aşağıdaki **1. ve 4. adımları atla**:
+Vercel, Supabase veritabanını kendi panelinden ekleyebilir. Bu yolda bağlantı değerleri siteye kendiliğinden işlenir ve **tablolar da kendiliğinden kurulur**; aşağıdaki 1., 2. ve 4. adımları atlarsın.
 
-1. Vercel'de projeyi aç. **Storage** sekmesinden (ya da **Marketplace → Supabase**) yeni bir Supabase veritabanı oluştur. Bölge olarak **Frankfurt** seç ve veritabanını bu projeye bağla.
-2. **Deployments** sekmesinde son yayını **Redeploy** et. Bağlantı değerleri ancak yeniden yayından sonra siteye işlenir.
-3. Vercel'deki veritabanı sayfasından **Open in Supabase** ile Supabase panelini aç ve aşağıdaki **2. adımdan** devam et (tablolar), ardından **3. adım** (yönetim ekibi).
+1. Vercel'de projeyi aç. **Storage** sekmesinden **Create Database → Supabase** ile yeni bir veritabanı oluştur. Bölge olarak **Frankfurt** seç ve veritabanını bu projeye bağla (**Connect**).
+2. **Deployments** sekmesinde son yayını **Redeploy** et.
 
-Kontrol: **Settings → Environment Variables** altında `NEXT_PUBLIC_SUPABASE_URL` ve `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (eski kurulumlarda `..._ANON_KEY`) görünmeli. Site ikisini de tanır.
+Yeniden yayın sırasında iki şey olur:
 
-Yeniden yayından sonra `/admin` adresinde "Kim giriyor?" yerine e-posta ve şifre soran giriş ekranı çıkıyorsa bağlantı kurulmuştur.
+- Site veritabanına bağlanır: başvuru formu kayıtları oraya yazar, `/admin` gerçek girişe geçer.
+- `scripts/setup-db.mjs` betiği `supabase/schema.sql` dosyasını veritabanına uygular. Sonucu yayının **Build Logs** kısmında `[veritabanı]` ile başlayan satırlarda görürsün: "Tablolar kuruldu (3/3 tablo hazır)".
+
+Geriye yalnızca yönetim ekibini eklemek kalır: Vercel'deki veritabanı sayfasından **Open in Supabase** ile paneli aç ve aşağıdaki **3. adımı** uygula.
+
+Notlar:
+
+- Şema dosyası değişirse bir sonraki yayında tablolar kendiliğinden güncellenir; değişmediyse betik hiçbir şeye dokunmaz.
+- Betik bir sorunla karşılaşırsa siteyi yayından alıkoymaz, nedenini günlüğe yazar. O durumda 2. adımdaki gibi şemayı elle çalıştırabilirsin.
+- Bağlantı şifrelidir. Supabase kendi sertifika otoritesini kullandığı için betik, Vercel'in verdiği bağlantı ayarına (`sslmode=require`) uyarak sunucu sertifikasını doğrulamadan bağlanır. Tam doğrulama istersen Supabase'in kök sertifikasını `SUPABASE_CA_CERT`, `NEXUS_DB_STRICT_TLS=1` ile birlikte Vercel ortam değişkeni olarak tanımla.
 
 ---
 
