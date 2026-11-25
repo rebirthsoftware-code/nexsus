@@ -14,7 +14,7 @@ export function CTA() {
         <div className="relative flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="label-mono text-lime">Üyelik açık</p>
-            <h2 className="display-tight mt-4 text-[clamp(3.5rem,11vw,8rem)]">
+            <h2 className="display-tight mt-4 text-[clamp(3.25rem,min(11vw,22vh),8rem)]">
               Sıra <span className="font-serif font-normal italic tracking-[-0.02em] text-lime">sende.</span>
             </h2>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/85">Başvuru iki dakika sürüyor. Bölümün, sınıfın fark etmez; merakın yeter.</p>

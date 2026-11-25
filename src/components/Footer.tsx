@@ -60,7 +60,7 @@ export function Footer() {
               <ul className="mt-4 space-y-3 text-sm text-paper/80">
                 <li className="flex items-start gap-2.5">
                   <InstagramIcon className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
-                  <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-paper">
+                  <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer" className="break-all hover:text-paper">
                     {site.instagramHandle}
                   </a>
                 </li>

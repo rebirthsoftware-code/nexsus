@@ -15,7 +15,7 @@ const faces = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-x-clip pb-16 pt-28 sm:pt-36 lg:pb-24">
+    <section className="relative overflow-x-clip pb-16 pt-28 sm:pt-36 short:pt-24 lg:pb-24">
       <div className="dot-grid pointer-events-none absolute inset-x-0 top-0 h-[36rem] [mask-image:linear-gradient(black,transparent)]" aria-hidden="true" />
       <Container className="relative">
         <div className="grid items-center gap-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10">
@@ -25,7 +25,7 @@ export function Hero() {
               {site.university} · Öğrenci Kulübü
             </p>
 
-            <h1 className="display-tight animate-rise mt-6 text-[clamp(3.5rem,11vw,7.5rem)] leading-[0.97]" style={{ animationDelay: "80ms" }}>
+            <h1 className="display-tight animate-rise mt-6 text-[clamp(3.25rem,min(11vw,19vh),7.5rem)] leading-[0.97]" style={{ animationDelay: "80ms" }}>
               Kampüsün <Mark>bağlantı</Mark> noktası.
             </h1>
 
@@ -62,7 +62,7 @@ export function Hero() {
           </div>
 
           <div className="animate-rise relative" style={{ animationDelay: "200ms" }}>
-            <ConnectionMap className="h-[26rem] sm:h-[32rem] lg:h-[37rem]" />
+            <ConnectionMap className="h-[26rem] sm:h-[32rem] short:h-[19rem] lg:h-[37rem]" />
             <SpinBadge
               id="hero-badge"
               text="HER BÖLÜME AÇIK ✦ ÜCRETSİZ ✦ "

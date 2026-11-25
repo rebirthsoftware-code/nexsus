@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 /*
+ * "short:" → yüksekliği az ekranlar (yan çevrilmiş telefon gibi).
+ * Genişliğe göre değil yüksekliğe göre sıkıştırma gereken yerlerde kullanılır.
+ */
+@custom-variant short (@media (max-height: 520px));
+
+/*
  * Nexus tasarım sistemi
  * Fikir: "kampüs afişi". Krem kağıt zemin, siyah çizgiler ve logonun mavisi ile
  * laciverti. Diğer canlı renkler (limon, mercan, sarı, lila) farklı bölümleri

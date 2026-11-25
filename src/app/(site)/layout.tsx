@@ -9,16 +9,17 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <a href="#icerik" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:border-2 focus:border-ink focus:bg-lime focus:px-4 focus:py-2 focus:font-bold">
         İçeriğe atla
       </a>
+      {site.preview && (
+        <p className="label-mono border-b-2 border-ink bg-sun px-3 py-1 text-center text-[0.62rem] tracking-[0.08em]">
+          Önizleme sürümü<span className="max-sm:hidden"> · ekip, etkinlik ve duyurular örnektir</span>
+          <span className="sm:hidden"> · içerikler örnektir</span>
+        </p>
+      )}
       <Navbar />
       <main id="icerik" className="flex-1">
         {children}
       </main>
       <Footer />
-      {site.preview && (
-        <p className="label-mono pointer-events-none fixed bottom-3 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border-2 border-ink bg-sun px-3 py-1.5 text-center shadow-hard-sm max-sm:text-[0.6rem] max-sm:tracking-[0.04em]">
-          Önizleme · ekip, etkinlik ve duyurular örnektir
-        </p>
-      )}
     </>
   );
 }
