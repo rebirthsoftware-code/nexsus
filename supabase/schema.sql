@@ -563,5 +563,24 @@ grant execute on function public.developer_checkin() to authenticated;
 grant execute on function public.account_set_password(text) to authenticated;
 grant execute on function public.setup_status() to anon, authenticated;
 
+-- Sitenin "Ekip" bölümünde gösterilen yönetim kurulu: yalnızca ad soyad ve görev.
+-- Herkese açıktır (kulübün başkanı ve yardımcıları sitede zaten tanıtılır). E-posta, hitap,
+-- hesap kimliği ve yazılımcı hesabı bu listede YER ALMAZ.
+create or replace function public.public_team()
+returns table (full_name text, role text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select a.full_name, a.role
+    from public.admins a
+   where a.role in ('baskan', 'baskan_yardimcisi')
+   order by case a.role when 'baskan' then 0 else 1 end, a.created_at;
+$$;
+
+revoke all on function public.public_team() from public;
+grant execute on function public.public_team() to anon, authenticated;
+
 -- API'nin yeni fonksiyonları hemen tanıması için
 notify pgrst, 'reload schema';

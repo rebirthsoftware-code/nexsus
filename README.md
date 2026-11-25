@@ -47,12 +47,13 @@ npm run lint
 
 ## İçeriği güncelleme
 
-Şu anki ekip isimleri, etkinlikler ve sayılar **örnek içeriktir**. Hepsi `src/content/` altında, kod bilgisi gerektirmeden değiştirilebilir:
+Şu anki koordinatör isimleri, etkinlikler ve sayılar **örnek içeriktir**. Yönetim kurulu (başkan ve iki yardımcısı) yönetim panelinden gelir. Hepsi `src/content/` altında, kod bilgisi gerektirmeden değiştirilebilir:
 
 | Ne | Dosya |
 | --- | --- |
 | Kulüp adı, açıklama, e-posta, sosyal medya, istatistikler, bölüm listesi, yazılım imzası | `src/content/site.ts` |
-| Ekip üyeleri (isim, görev, bölüm, renk, klip, fotoğraf) | `src/content/team.ts` – dosyalar `public/team/` |
+| Koordinatörler (isim, görev, bölüm, renk, klip, fotoğraf) ve yönetim kurulu üyelerinin ek bilgileri (bölüm, fotoğraf, söz) | `src/content/team.ts` – dosyalar `public/team/` |
+| Yönetim kurulunun adları ve görevleri | Yönetim paneli → **Ekip** (yalnızca yazılımcı) |
 | Etkinlikler | `src/content/events.ts` |
 | Duyurular (gezi, stant, ekip alımı...) | `src/content/announcements.ts` |
 | Fotoğraflar (Sizden Kalanlar) | `fotograflar/` klasörü |

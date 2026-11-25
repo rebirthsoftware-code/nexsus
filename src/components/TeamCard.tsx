@@ -45,7 +45,7 @@ export function TeamCard({ member, index = 0 }: { member: TeamMember; index?: nu
           </h3>
           <p className="rotate-1 border-2 border-ink bg-sun px-2 py-0.5 font-display text-xs font-bold leading-tight text-navy sm:text-sm">{member.role}</p>
         </div>
-        <p className="label-mono mt-3 text-[0.62rem] text-ink-soft sm:text-[0.72rem]">{member.department}</p>
+        {member.department && <p className="label-mono mt-3 text-[0.62rem] text-ink-soft sm:text-[0.72rem]">{member.department}</p>}
         {member.quote && <p className="mt-2 hidden font-serif text-lg italic leading-snug sm:block">“{member.quote}”</p>}
         {(member.instagram || member.linkedin) && (
           <div className="mt-auto flex gap-2 pt-3">

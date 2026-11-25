@@ -8,7 +8,7 @@ import { Bento } from "@/components/Bento";
 import { CertificateSpotlight } from "@/components/CertificateSpotlight";
 import { HomeEvents, HomeHeadline } from "@/components/HomeLive";
 import { Steps } from "@/components/Steps";
-import { TeamCard } from "@/components/TeamCard";
+import { ManagementCards } from "@/components/ManagementCards";
 import { FAQ } from "@/components/FAQ";
 import { CTA } from "@/components/CTA";
 import { SocialTiles } from "@/components/SocialTiles";
@@ -16,7 +16,7 @@ import { HomeGallery } from "@/components/HomeGallery";
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/Button";
 import { Mark, SectionLabel } from "@/components/Shapes";
-import { team } from "@/content/team";
+import { getManagement } from "@/lib/management-snapshot";
 import { getToday } from "@/lib/today";
 
 // Kulübün kendi tanıtım cümlelerinden (linktr.ee/nexuskbu)
@@ -33,7 +33,8 @@ function TextLink({ href, children }: { href: string; children: React.ReactNode 
 
 export default async function HomePage() {
   const today = await getToday();
-  const leadership = team[0]?.members.slice(0, 4) ?? [];
+  // Yönetim kurulu panelden gelir (derleme anındaki hali; sayfa açılınca güncellenir)
+  const leadership = getManagement().members;
 
   return (
     <>
@@ -121,13 +122,7 @@ export default async function HomePage() {
             </div>
             <TextLink href="/ekip">Tüm ekip</TextLink>
           </Reveal>
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-            {leadership.map((m, i) => (
-              <Reveal key={i} delay={i * 90}>
-                <TeamCard member={m} index={i} />
-              </Reveal>
-            ))}
-          </div>
+          <ManagementCards initial={leadership} joinCard />
         </Container>
       </section>
 

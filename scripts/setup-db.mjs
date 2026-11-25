@@ -10,11 +10,13 @@
  * - Panelin "yazılımcı" hesabı yoksa açar. Yazılımcı, yönetim ekibini panelden ekleyip değiştirir.
  *   Hesabın geçici şifresi yalnızca bu derleme günlüğüne yazılır (günlüğü yalnızca Vercel
  *   projesinin sahibi görebilir) ve ilk girişten sonra panelden değiştirilir.
+ * - Yönetim kurulunun adını ve görevini .nexus/yonetim.json dosyasına yazar; sitenin "Ekip"
+ *   bölümü derlenirken bu dosyayı okur. Böylece panelde eklenen yönetim sitede de görünür.
  * - Bir sorun çıkarsa siteyi yayından alıkoymaz; ne olduğunu derleme günlüğüne yazar.
  * - Bağlantı adresini ve şifreyi asla günlüğe yazmaz.
  */
 import { createHash, createHmac } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const log = (msg) => console.log(`[veritabanı] ${msg}`);
 
@@ -156,10 +158,26 @@ async function main() {
       } catch (error) {
         log(`UYARI: Yazılımcı hesabı hazırlanamadı: ${error.message}`);
       }
+      try {
+        await snapshotManagement(client);
+      } catch (error) {
+        log(`UYARI: Yönetim kurulu siteye aktarılamadı: ${error.message}`);
+      }
     }
   } finally {
     await client.end().catch(() => {});
   }
+}
+
+/**
+ * Yönetim kurulunu (yalnızca ad soyad ve görev) sitenin derlemede okuyacağı dosyaya yazar.
+ * Site ayrıca açıldığında güncel listeyi veritabanından da ister; bu dosya ilk çizim içindir.
+ */
+async function snapshotManagement(client) {
+  const { rows } = await client.query("select full_name, role from public.public_team()");
+  mkdirSync(new URL("../.nexus/", import.meta.url), { recursive: true });
+  writeFileSync(new URL("../.nexus/yonetim.json", import.meta.url), JSON.stringify(rows, null, 2));
+  log(`Yönetim kurulu siteye aktarıldı (${rows.length} kişi).`);
 }
 
 /**

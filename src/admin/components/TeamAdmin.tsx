@@ -247,6 +247,7 @@ export function TeamAdmin({
           </ul>
         )}
         <p className="mt-4 text-xs leading-relaxed text-ink-soft">Ekip üç kişidir: bir başkan ve iki başkan yardımcısı. Herkes başvuruları görür ve durumunu değiştirir; kalıcı silme yetkisi yalnızca başkandadır.</p>
+        <p className="mt-2 text-xs leading-relaxed text-ink-soft">Buradaki ad soyad ve görev, sitenin ana sayfasındaki ve Ekip sayfasındaki yönetim kurulu kartlarında da görünür. E-posta ve hitap sitede yayınlanmaz.</p>
       </Card>
 
       {developers.length > 0 && (

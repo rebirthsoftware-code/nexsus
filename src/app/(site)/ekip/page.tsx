@@ -6,7 +6,9 @@ import { TeamCard } from "@/components/TeamCard";
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/Button";
 import { Mark } from "@/components/Shapes";
-import { team } from "@/content/team";
+import { ManagementCards } from "@/components/ManagementCards";
+import { management, team } from "@/content/team";
+import { getManagement } from "@/lib/management-snapshot";
 
 export const metadata: Metadata = {
   title: "Ekip",
@@ -14,7 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function TeamPage() {
-  let counter = 0;
+  // Yönetim kurulu panelden gelir; kart numaraları onlardan sonra devam eder
+  const leadership = getManagement().members;
+  let counter = leadership.length;
   return (
     <>
       <PageHeader
@@ -27,6 +31,16 @@ export default function TeamPage() {
         description="Her biri başka bir bölümden gelen, kulübü gönüllü olarak yürüten ekip."
       />
       <Container className="space-y-24">
+        <section>
+          <Reveal className="flex flex-col gap-2 border-b-2 border-ink pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="display-tight text-4xl sm:text-5xl">{management.title}</h2>
+            <p className="label-mono text-ink-soft">{management.note}</p>
+          </Reveal>
+          <div className="mt-10">
+            <ManagementCards initial={leadership} />
+          </div>
+        </section>
+
         {team.map((group) => (
           <section key={group.title}>
             <Reveal className="flex flex-col gap-2 border-b-2 border-ink pb-5 sm:flex-row sm:items-end sm:justify-between">

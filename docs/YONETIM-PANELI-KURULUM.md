@@ -93,6 +93,8 @@ Yazılımcı hesabıyla girince menüde **Ekip** bölümü görünür. Bu bölü
 
 Her yönetici kendi şifresini **Ayarlar → Şifre değiştir** ile değiştirebilir.
 
+**Sitede görünüm:** Ekibe eklenen kişilerin **ad soyadı ve görevi** sitenin ana sayfasındaki ve Ekip sayfasındaki yönetim kurulu kartlarında kendiliğinden görünür; panelde yapılan değişiklik siteye de yansır. E-posta, hitap ve yazılımcı hesabı sitede yayınlanmaz. Bir üyeye bölüm, fotoğraf ya da söz eklemek için [`src/content/team.ts`](../src/content/team.ts) içindeki `management.details` kullanılır.
+
 Kurallar veritabanında tanımlıdır: en fazla bir başkan ve iki başkan yardımcısı olabilir. Ekipte olmayan bir hesap giriş yapsa bile hiçbir başvuruyu göremez. Ekibi düzenleyen fonksiyonları yalnızca yazılımcı çağırabilir; panel arayüzü atlansa bile başka hiç kimse ekibi değiştiremez. Yazılımcı hesabı yöneticilere görünmez.
 
 **Yetkiler:** Üç yönetici de başvuruları görür, arar, durumunu ve notunu değiştirir. Bir başvuruyu **kalıcı olarak silmek yalnızca başkana** (ve yazılımcıya) açıktır; bu kural da veritabanında tanımlıdır.

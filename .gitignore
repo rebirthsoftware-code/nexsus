@@ -42,3 +42,6 @@ next-env.d.ts
 
 # "Sizden Kalanlar" galerisi: fotograflar/ klasöründen derleme sırasında üretilir
 /public/galeri/
+
+# Yönetim kurulunun derleme sırasında veritabanından alınan kopyası (scripts/setup-db.mjs)
+/.nexus/
