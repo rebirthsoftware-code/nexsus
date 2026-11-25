@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description: site.description,
+  // Yazılım imzası (sayfa kaynağındaki meta etiketleri)
+  authors: [{ name: site.developer.name, url: site.developer.url }],
+  creator: site.developer.name,
   keywords: ["Nexus", "Karabük Üniversitesi", "öğrenci kulübü", "KBÜ kulüp", "İŞKUR sertifika", "kariyer", "öğrenci topluluğu"],
   openGraph: {
     type: "website",
@@ -40,7 +43,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr" className={`${display.variable} ${body.variable} ${serif.variable} ${mono.variable} h-full`}>
       <head>
         {/* Scroll animasyonları için JS'in aktif olduğunu işaretler; JS yoksa içerik gizlenmez */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.setAttribute('data-js','')" }} />
+        <script
+          dangerouslySetInnerHTML={{
+            // İkinci satır: tarayıcı konsoluna yazılım imzası
+            __html: `document.documentElement.setAttribute('data-js','');console.log('%c </> %c ${site.developer.name} %c Tasarım ve yazılım · ${site.developer.url}','background:#c8f03c;color:#0b0b0c;font-weight:bold;border-radius:4px 0 0 4px;padding:3px 0','background:#011e45;color:#f5f2ea;font-weight:bold;border-radius:0 4px 4px 0;padding:3px 4px','color:#55524d;padding-left:6px')`,
+          }}
+        />
       </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

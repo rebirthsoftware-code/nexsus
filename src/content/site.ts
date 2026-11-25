@@ -19,6 +19,11 @@ export const site = {
   email: "", // TODO: kulübün gerçek e-posta adresi (boşken sitede gösterilmez)
   foundedYear: 2024, // TODO
   location: "Karabük Üniversitesi, Demir Çelik Kampüsü",
+  /** Yazılım imzası: siteyi tasarlayıp geliştiren. Alt bilgide ve yönetim panelinde görünür. */
+  developer: {
+    name: "Rebirth Software",
+    url: "https://github.com/rebirthsoftware-code",
+  },
   instagramHandle: "@nexuskarabukuni",
   /** Kulübün resmi hesapları (kaynak: linktr.ee/nexuskbu). Boş bırakılan hesap sitede gösterilmez. */
   socials: {

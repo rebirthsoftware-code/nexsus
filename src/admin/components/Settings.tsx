@@ -5,6 +5,7 @@ import { Bell, BellOff, BellRing, Check, Database, Download, LogOut, PlusCircle,
 import { cn } from "@/lib/utils";
 import { VAPID_PUBLIC_KEY, disableNotifications, enableNotifications, getNotificationState, hasPushSubscription, isIos, isStandalone, showNotification, type NotificationState } from "../push";
 import { roleLabel, type AdminUser, type Backend, type TeamMember } from "../types";
+import { Signature } from "@/components/Signature";
 import { Avatar, Card, CardTitle } from "./ui";
 
 /** Chrome ve Edge'in "uygulamayı yükle" penceresini açan olay */
@@ -266,6 +267,11 @@ export function Settings({
         </ul>
         <p className="mt-3 text-xs leading-relaxed text-ink-soft">Panele yalnızca bu ekip girebilir: bir başkan ve iki başkan yardımcısı. Herkes başvuruları görür ve durumunu değiştirir; kalıcı silme yetkisi yalnızca başkandadır.</p>
       </Card>
+
+      <footer className="flex flex-col items-center gap-2 pb-2 pt-3 text-center">
+        <Signature tone="dark" />
+        <p className="label-mono text-[0.6rem] text-ink-soft">Nexus Yönetim Paneli</p>
+      </footer>
     </div>
   );
 }

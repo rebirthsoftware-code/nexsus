@@ -6,6 +6,7 @@ import { site, navLinks, socialAccounts } from "@/content/site";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 import { Year } from "./Year";
+import { Signature } from "./Signature";
 import { InstagramIcon, socialIcons } from "./icons";
 
 export function Footer() {
@@ -88,11 +89,12 @@ export function Footer() {
       </div>
 
       <div className="relative border-t-2 border-paper/15 bg-navy">
-        <Container className="flex flex-col items-start justify-between gap-2 py-5 text-xs text-paper/60 sm:flex-row sm:items-center">
+        <Container className="flex flex-col items-start gap-x-6 gap-y-3 py-5 text-xs text-paper/60 lg:flex-row lg:items-center lg:justify-between">
           <p>
             © {site.foundedYear}–<Year fallback={site.foundedYear + 2} /> {site.fullName} · {site.university}
           </p>
-          <p className="label-mono flex items-center gap-4">
+          <Signature />
+          <p className="label-mono flex flex-wrap items-center gap-x-4 gap-y-1">
             Öğrenciler tarafından, öğrenciler için
             <Link href="/admin" className="underline decoration-paper/30 underline-offset-4 hover:text-paper">
               Yönetim

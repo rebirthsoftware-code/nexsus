@@ -51,7 +51,7 @@ npm run lint
 
 | Ne | Dosya |
 | --- | --- |
-| Kulüp adı, açıklama, e-posta, sosyal medya, istatistikler, bölüm listesi | `src/content/site.ts` |
+| Kulüp adı, açıklama, e-posta, sosyal medya, istatistikler, bölüm listesi, yazılım imzası | `src/content/site.ts` |
 | Ekip üyeleri (isim, görev, bölüm, renk, klip, fotoğraf) | `src/content/team.ts` – dosyalar `public/team/` |
 | Etkinlikler | `src/content/events.ts` |
 | Duyurular (gezi, stant, ekip alımı...) | `src/content/announcements.ts` |

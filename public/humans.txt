@@ -1,0 +1,8 @@
+/* YAZILIM */
+Tasarım ve yazılım: Rebirth Software
+Adres: https://github.com/rebirthsoftware-code
+
+/* SİTE */
+Nexus Öğrenci Kulübü, Karabük Üniversitesi
+Dil: Türkçe
+Teknoloji: Next.js, React, TypeScript, Tailwind CSS

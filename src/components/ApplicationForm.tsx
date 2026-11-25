@@ -9,6 +9,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/admin/config";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { MemberCard } from "./MemberCard";
+import { MemberCardMini } from "./MemberCardMini";
 import { Button } from "./Button";
 
 const inputCls =
@@ -262,6 +263,12 @@ export function ApplicationForm() {
         </div>
       </aside>
 
+      {/* Form ile mini kart aynı sarmalayıcıda: kart, form boyunca ekranın üstünde yapışık kalır */}
+      <div className="min-w-0">
+        <div className="sticky top-[4.75rem] z-30 mb-6 lg:hidden">
+          <MemberCardMini name={fullName} department={department} classYear={classYear} interests={chips} />
+        </div>
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-12 rounded-[2rem] border-2 border-ink bg-paper p-6 shadow-hard-lg sm:p-10">
         <fieldset>
           <Legend n="1">Seni tanıyalım</Legend>
@@ -355,6 +362,7 @@ export function ApplicationForm() {
         </Button>
         {!CAN_SUBMIT && <p className="text-sm text-ink-soft">Başvurun bir metin olarak hazırlanır; son adımda Instagram mesajıyla bize gönderirsin.</p>}
       </form>
+      </div>
     </div>
   );
 }

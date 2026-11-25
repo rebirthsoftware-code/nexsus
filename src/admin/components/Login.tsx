@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowRight, ChevronRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Logo, LogoMark } from "@/components/Logo";
+import { Signature } from "@/components/Signature";
 import { cn } from "@/lib/utils";
 import { roleLabel, type AdminUser, type Backend } from "../types";
 import { Avatar } from "./ui";
@@ -59,7 +60,10 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
             Yeni üyelik başvurularını gör, onayla, ara. Telefonuna uygulama olarak yükle, başvuru geldiğinde bildirim al.
           </p>
         </div>
-        <p className="label-mono hidden text-paper/50 lg:block">Yalnızca kulüp yönetimi içindir</p>
+        <div className="hidden flex-wrap items-center gap-x-5 gap-y-2 lg:flex">
+          <p className="label-mono text-paper/50">Yalnızca kulüp yönetimi içindir</p>
+          <Signature />
+        </div>
       </div>
 
       <div className="animate-rise relative flex items-center justify-center short:w-[24rem] short:shrink-0 short:overflow-y-auto short:p-3 short:pr-[calc(env(safe-area-inset-right)+0.75rem)] lg:w-[32rem] lg:p-10" style={{ animationDelay: "160ms" }}>
@@ -128,6 +132,9 @@ export function Login({ backend, onSignedIn }: { backend: Backend; onSignedIn: (
               {error}
             </p>
           )}
+          <div className="mt-6 flex justify-center short:mt-3 lg:hidden">
+            <Signature tone="dark" />
+          </div>
         </div>
       </div>
     </div>
