@@ -22,7 +22,7 @@ export const site = {
   /** Yazılım imzası: siteyi tasarlayıp geliştiren. Alt bilgide ve yönetim panelinde görünür. */
   developer: {
     name: "Rebirth Software",
-    url: "https://github.com/rebirthsoftware-code",
+    url: "https://www.instagram.com/rebirthsoftware/",
   },
   instagramHandle: "@nexuskarabukuni",
   /** Kulübün resmi hesapları (kaynak: linktr.ee/nexuskbu). Boş bırakılan hesap sitede gösterilmez. */
