@@ -128,7 +128,11 @@ export function GalleryWall({ albums }: { albums: GalleryAlbum[] }) {
               </>
             )}
           </div>
-          <p className="min-h-[3.5rem] px-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 text-center font-serif text-2xl italic">{current.caption}</p>
+          {current.caption ? (
+            <p className="min-h-[3.5rem] px-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 text-center font-serif text-2xl italic">{current.caption}</p>
+          ) : (
+            <div className="h-[calc(env(safe-area-inset-bottom)+1.25rem)]" aria-hidden="true" />
+          )}
         </div>
       )}
     </div>

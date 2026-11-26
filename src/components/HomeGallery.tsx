@@ -28,7 +28,7 @@ export function HomeGallery() {
           ? latest.map(({ photo, album }, i) => (
               <Reveal as="li" key={photo.src} delay={i * 90} className={offsets[i]}>
                 <Link href={`/sizden-kalanlar#${album.slug}`} className="group block" aria-label={`${album.title} albümünü aç`}>
-                  <Polaroid index={i} caption={photo.caption || album.title} className="group-hover:rotate-0 group-hover:scale-[1.03]">
+                  <Polaroid index={i} caption={photo.caption} className="group-hover:rotate-0 group-hover:scale-[1.03]">
                     {/* eslint-disable-next-line @next/next/no-img-element -- statik yayında görsel optimizasyonu yok; küçültme derleme öncesinde yapılır */}
                     <img src={asset(photo.thumb)} alt={photo.caption || `${album.title} etkinliğinden bir kare`} loading="lazy" decoding="async" className="aspect-[4/5] w-full border-2 border-ink bg-paper-deep object-cover" />
                   </Polaroid>
